@@ -1,0 +1,26 @@
+{
+  "name": "vizabi-ws-reader",
+  "version": "0.0.1",
+  "description": "Vizabi WS reader",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "build": "npm run eslint && ./node_modules/.bin/webpack",
+    "eslint": "./node_modules/.bin/eslint --ignore-path .gitignore --ext js --fix . .config",
+    "prepublish": "npm run eslint && PROD_ENV=1 webpack"
+  },
+  "author": "Valor-Software",
+  "license": "GPL-3.0",
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "ava": "0.15.2",
+    "babel": "^6.0.15",
+    "babel-loader": "6.2.4",
+    "babel-preset-es2015": "^6.1.2",
+    "eslint": "3.0.1",
+    "eslint-config-valorsoft": "0.0.16",
+    "webpack": "^1.12.3"
+  }
+}
+
