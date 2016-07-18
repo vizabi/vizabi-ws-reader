@@ -1,6 +1,3 @@
 import {WSReader} from './ws-reader';
 
-module.exports = {
-  WSReader
-};
-
+module.exports = {WSReader};

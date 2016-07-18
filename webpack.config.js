@@ -3,8 +3,9 @@ const path = require('path');
 
 /* eslint-disable no-process-env */
 const PROD = JSON.parse(process.env.PROD_ENV || '0');
+const WEB = JSON.parse(process.env.WEB_ENV || '0');
 
-module.exports = {
+const config = {
   entry: {'main-backend': './src/index.js'},
   target: 'node',
   output: {
@@ -26,3 +27,13 @@ module.exports = {
     new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
   ] : []
 };
+
+// pack for Web
+
+if (WEB) {
+  config.output.filename = 'bundle.web.js';
+  config.output.libraryTarget = 'var';
+  config.output.library = 'WSReader';
+}
+
+module.exports = config;

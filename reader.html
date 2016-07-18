@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Reader API</title>
+</head>
+
+<script src="./dist/bundle.web.js"></script>
+
+<script>
+
+    // /api/ddf/datapoints?dataset=ddf-gapminder-world-stub-1-validated&version=1468421723948&year=1800:2015&select=geo,year,energy_use_total,sg_population
+
+    const wsReader = new WSReader.WSReader();
+    const wsReaderInst = wsReader.getReader();
+
+    const language = 'en';
+    const wsReaderConfig = {
+        'parsers' : {},
+        'path': "http://localhost:3000/api/ddf/datapoints",
+        'reader': "waffle",
+        'splash': true
+    };
+    const wsReaderQuery = {
+        //'select': ['geo', 'year', 'energy_use_total', 'sg_population'],
+        //'grouping': {'geo': undefined,'time': undefined},
+        //'where': {'year': ['1800:2015']}
+    };
+
+    // setup params
+    // wsReaderQuery['dataset'] = 'ddf-gapminder-world-stub-1-validated';
+    // wsReaderQuery['version'] = '1468421723948';
+    wsReaderConfig.path += '?dataset=ddf-gapminder-world-stub-1-validated&version=206544d&select=geo,time,energy_use_total,sg_population';
+    // http://localhost:3000/api/ddf/datapoints?dataset=ddf-gapminder-world-stub-1-validated&version=206544d&select=geo,time,energy_use_total,sg_population
+
+
+    wsReaderInst.init(wsReaderConfig);
+    const wsResult = wsReaderInst.read(wsReaderQuery, language);
+
+    wsResult.then(function () {
+
+        let wsReaderData = wsReaderInst.getData();
+        console.log("wsReaderData", wsReaderData);
+
+    });
+
+</script>
+
+<body>Working...</body>
+</html>
