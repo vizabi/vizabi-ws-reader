@@ -30,6 +30,21 @@ export class WSReader {
           Utils.error(ERROR_PARAM_PATH);
         }
 
+        // UPDATE
+        // http://localhost:3000/api/graphs/stats/vizabi-tools"
+
+        // *** /api/graphs/stats/vizabi-tools
+        // *** /api/ddf/entities
+
+        // *** /api/graphs/stats/vizabi-tools
+        // *** /api/ddf/datapoints
+
+        this._predefined_path = {
+          'old_path':'/api/graphs/stats/vizabi-tools',
+          'datapoints':'/api/ddf/datapoints',
+          'entities':'/api/ddf/entities'
+        };
+
         this._data = [];
       },
 
@@ -79,6 +94,7 @@ export class WSReader {
 
 
       _encodeQuery: function (params) {
+        console.log("WSReader, params", params);
         var _params = cloneDeep({}, params.where);
         _params.select = params.select;
         _params.gapfilling = params.gapfilling;
@@ -99,7 +115,9 @@ export class WSReader {
           }
         });
 
-        return result.join('&');
+        var resultPath = result.join('&');
+        console.log("WSReader, result", resultPath);
+        return resultPath;
       },
 
       _readCallbackSuccess: function (p, path, query, resp) {
