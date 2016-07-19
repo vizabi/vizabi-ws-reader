@@ -3,6 +3,7 @@
 import {VizabiPromise} from './vizabi-promise';
 import {QueryEncoder} from './query-encoder';
 import {Utils} from './utils';
+import {Unpack} from './unpack';
 import cloneDeep from 'lodash/cloneDeep';
 
 var FILE_CACHED = {}; //caches files from this reader
@@ -51,12 +52,14 @@ export class WSReader {
       read(query, language) {
 
         var p = new VizabiPromise();
-        var path = this._basepath;
 
-        // detect new path for new WS
-        // path
+        // START :: improvements
 
-        path += '?' + this._encodeQuery(query);
+        // encode query and check path
+        var encodedQuery = this._encodeQuery(query);
+        var path = this._basepath + '?' + encodedQuery;
+
+        // END :: improvements
 
         this._data = [];
 
@@ -94,8 +97,88 @@ export class WSReader {
 
 
       _encodeQuery: function (params) {
-        console.log("WSReader, params", params);
-        var _params = cloneDeep({}, params.where);
+
+        var _params = cloneDeep(params.where);
+
+        // START :: improvements
+
+        // 1. detect additional where parameters
+
+        if(params.where) {
+          for(let whereKey in params.where) {
+            if(whereKey.indexOf(".") != -1) {
+              let whereKeyPart = whereKey.split(".");
+              let whereKeyPrefix = whereKeyPart[0];
+              let whereDataLength = params.where[whereKey].length;
+              for(let whereKeyIndex = 0; whereKeyIndex < whereDataLength; whereKeyIndex++) {
+                if(params.where[whereKey][whereKeyIndex] != 'unstate') {
+                  let generatedKey = whereKeyPrefix + '.is--' + params.where[whereKey][whereKeyIndex];
+                  _params[generatedKey] = 1;
+                }
+              }
+              delete _params[whereKey];
+            }
+          }
+        }
+
+        // 2. detect destination
+
+        let pathOldKey = 'old_path';
+        let pathKey = 'datapoints';
+        if(params.select) {
+          let selectLength = params.select.length;
+          for(let selectIndex = 0; selectIndex < selectLength; selectIndex++) {
+            if(params.select[selectIndex].indexOf(".") != -1) {
+              pathKey = 'entities';
+              break;
+            }
+          }
+        }
+
+        // 3. update path with new one
+
+        this._basepath = this._basepath
+          .split(this._predefined_path[pathOldKey])
+          .join(this._predefined_path[pathKey]);
+
+        // 4. update select statement
+
+        let paramKey = [];
+        if(params.select) {
+          let paramSelectNew = [];
+          let selectLength = params.select.length;
+          for(let selectIndex = 0; selectIndex < selectLength; selectIndex++) {
+            if(params.select[selectIndex].indexOf(".") != -1) {
+              let selectKeyPart = params.select[selectIndex].split(".");
+              let selectKeyPrefix = selectKeyPart[0];
+              let selectKeyCleared = selectKeyPart[1];
+              // store select prefix into param Key
+              if(paramKey.indexOf(selectKeyPrefix) == -1) {
+                paramKey.push(selectKeyPrefix);
+              }
+              // update select statement
+              paramSelectNew.push(selectKeyCleared);
+              //params.select.splice(selectIndex, 1);
+            } else {
+              paramSelectNew.push(params.select[selectIndex]);
+            }
+          }
+          params.select = paramSelectNew;
+
+          // update parameter Key for DataPoints request
+          if(pathKey == 'datapoints') {
+            Array.prototype.push.apply(paramKey, paramSelectNew.slice(0, 2));
+          }
+        }
+
+        // 5. add Key parameter
+
+        if(paramKey.length) {
+          _params.key = paramKey;
+        }
+
+        // END :: improvements
+
         _params.select = params.select;
         _params.gapfilling = params.gapfilling;
 
@@ -115,9 +198,7 @@ export class WSReader {
           }
         });
 
-        var resultPath = result.join('&');
-        console.log("WSReader, result", resultPath);
-        return resultPath;
+        return result.join('&');
       },
 
       _readCallbackSuccess: function (p, path, query, resp) {
@@ -131,17 +212,31 @@ export class WSReader {
           return;
         }
 
-        // unpack response
-        // resp = resp;
+        // START :: improvements
 
-        //format data
-        resp = Utils.mapRows(this._uzip(resp.data || resp), this._parsers);
+        let self = this;
 
-        //cache and resolve
-        FILE_CACHED[path] = resp;
+        Unpack(resp, function (err, unpackedJson) {
 
-        this._parse(p, query, resp);
-        FILE_REQUESTED[path] = void 0;
+          if(err) {
+            Utils.error("Unpack error: ", err);
+            p.reject({
+              'message' : 'Unpack error',
+              'data': err
+            });
+            return;
+          }
+
+          resp = Utils.mapRows(unpackedJson, self._parsers);
+
+          //cache and resolve
+          FILE_CACHED[path] = resp;
+
+          self._parse(p, query, resp);
+          FILE_REQUESTED[path] = void 0;
+        });
+
+        // END :: improvements
       },
 
       _readCallbackError: function (p, path, query, resp) {
@@ -149,28 +244,6 @@ export class WSReader {
           'message' : ERROR_NETWORK,
           'data': path
         });
-      },
-
-      _uzip: function (table) {
-        var header;
-        var rows = table.rows;
-        var headers = table.headers;
-        var result = new Array(rows.length);
-        // unwrap compact data into json collection
-        for (var i = 0; i < rows.length; i++) {
-          result[i] = {};
-          for (var headerIndex = 0; headerIndex < headers.length; headerIndex++) {
-            header = headers[headerIndex];
-            result[i][header] = '';
-            if (!(typeof rows[i][headerIndex] == 'undefined' || rows[i][headerIndex] === null)) {
-              result[i][header] = rows[i][headerIndex].toString();
-            }
-            if (header === 'geo.cat') {
-              result[i][header] = [result[i][header]];
-            }
-          }
-        }
-        return result;
       },
 
       _parse: function (p, query, resp) {
