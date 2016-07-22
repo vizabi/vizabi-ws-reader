@@ -65,7 +65,7 @@ function __packDdfDatapoints(data) {
     }, {});
 
     return _.chain(row).drop(offsetKey).reduce((result, value, index) => {
-      result[indicators[index]] = data.datapoints.values[value] || '';
+      result[indicators[index]] = data.datapoints.values[value] || null;
       return result;
     }, datapoint).value();
   });
