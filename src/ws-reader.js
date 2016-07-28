@@ -5,6 +5,7 @@ import {QueryEncoder} from './query-encoder';
 import {Utils} from './utils';
 import {Unpack} from './unpack';
 import cloneDeep from 'lodash/cloneDeep';
+import isArray from 'lodash/isArray';
 
 var FILE_CACHED = {}; //caches files from this reader
 var FILE_REQUESTED = {}; //caches files from this reader
@@ -179,6 +180,18 @@ export class WSReader {
         _params.select = params.select;
         _params.gapfilling = params.gapfilling;
 
+        // START :: test 3 type of Response Format
+
+        // Checked :: Ok (array format)
+        //_params.format = 'json';
+        // Checked :: Ok (new format)
+        //_params.format = 'ddfJson';
+        // Checked :: Ok (old format)
+        // _params.format = 'wsJson';
+        //_params.force = true;
+
+        // END :: test 3 type of Response Format
+
         // todo: WS doesn't support value `*` for geo parameter
         // remove this condition when geo will be removed from params.where (when you need all geo props)
         if (_params.geo && _params.geo.length === 1 && _params.geo[0] === '*') {
@@ -200,17 +213,48 @@ export class WSReader {
 
       _readCallbackSuccess: function (p, path, query, resp) {
 
-        if (!resp) {
-          Utils.error("Empty json: " + path);
+        if(this._isResponsePacked(resp)) {
+
+          // convert with new strategy (Unpack module)
+          this._parseResponsePacked(p, path, query, resp, this._readCallbackSuccessDone.bind(this));
+
+        } else if (this._isResponseNotPacked(resp)) {
+
+          // convert with old strategy (Uzip)
+          this._parseResponseNotPacked(p, path, query, resp, this._readCallbackSuccessDone.bind(this));
+
+        } else if (this._isResponseReadyArray(resp)) {
+
+          // keep as is
+          this._parseResponseArray(p, path, query, resp, this._readCallbackSuccessDone.bind(this));
+
+        } else {
+
+          Utils.error("Bad Response Format: " + path, resp);
           p.reject({
             'message' : ERROR_RESPONSE,
-            'data': path
+            'data': resp
           });
           return;
         }
+      },
 
+      // detect type of response
 
-        // START :: improvements
+      _isResponsePacked: function(resp) {
+        return typeof resp == 'object' && typeof resp.concepts != 'undefined' ? true : false;
+      },
+      _isResponseNotPacked: function(resp) {
+        let readyResp = resp.data || resp;
+        return typeof readyResp == 'object' && typeof readyResp.headers != 'undefined' ? true : false;
+      },
+      _isResponseReadyArray: function(resp) {
+        return isArray(resp) && resp.length > 0 ? true : false;
+      },
+
+      // parse response with one of defined strategies
+
+      _parseResponsePacked: function(p, path, query, resp, done) {
 
         let self = this;
 
@@ -224,8 +268,6 @@ export class WSReader {
             });
             return;
           }
-
-          // if (['', '', ''].some(val => val === key)) { skip }
 
           if(path.indexOf('entities') > -1) {
             let prefixKey = query.key[0];
@@ -247,11 +289,11 @@ export class WSReader {
             });
           }
 
-          resp = Utils.mapRows(unpackedJson, self._parsers);
+          let respReady = Utils.mapRows(unpackedJson, self._parsers);
 
           // clone partially uzip functionality
 
-          resp.forEach(function(value){
+          respReady.forEach(function(value){
             for(let objKey in value) {
               if(!(typeof value[objKey] == 'undefined' || value[objKey] === null)) {
                 value[objKey] = value[objKey].toString();
@@ -261,26 +303,86 @@ export class WSReader {
 
           delete query.key;
 
-          //cache and resolve
-          FILE_CACHED[path] = resp;
-
-          self._parse(p, query, resp);
-          FILE_REQUESTED[path] = void 0;
+          done(p, path, query, respReady);
         });
         // END :: improvements
       },
 
-      _readCallbackError: function (p, path, query, resp) {
-        p.reject({
-          'message' : ERROR_NETWORK,
-          'data': path
-        });
+      _parseResponseNotPacked: function(p, path, query, resp, done) {
+
+        let respReady = Utils.mapRows(this._uzip(resp.data || resp, query), this._parsers);
+
+        if(path.indexOf('entities') > -1) {
+          let prefixKey = query.key[0];
+          respReady.forEach(function (value, index) {
+            for (let keyEntity in value) {
+              if (
+                keyEntity.indexOf("shape") == -1 &&
+                query.key.indexOf(keyEntity) == -1
+              ) {
+                let currValue = value[keyEntity];
+                value[prefixKey + '.' + keyEntity] = currValue;
+                delete value[keyEntity];
+              }
+              if (keyEntity.indexOf("shape") > -1) {
+                let currValue = value[keyEntity];
+                value[keyEntity] = "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 584.5 364.5'><path id='" + value[prefixKey] + "' d='" + currValue + "'/></svg>";
+              }
+            }
+          });
+        }
+
+        done(p, path, query, respReady);
       },
+
+      _parseResponseArray: function(p, path, query, resp, done) {
+
+        if(path.indexOf('entities') > -1) {
+          let prefixKey = query.key[0];
+          resp.forEach(function (value, index) {
+            for (let keyEntity in value) {
+              if (
+                keyEntity.indexOf("shape") == -1 &&
+                query.key.indexOf(keyEntity) == -1
+              ) {
+                let currValue = value[keyEntity];
+                value[prefixKey + '.' + keyEntity] = currValue;
+                delete value[keyEntity];
+              }
+              if (keyEntity.indexOf("shape") > -1) {
+                let currValue = value[keyEntity];
+                value[keyEntity] = "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 584.5 364.5'><path id='" + value[prefixKey] + "' d='" + currValue + "'/></svg>";
+              }
+            }
+          });
+        }
+
+        let respReady = Utils.mapRows(resp, this._parsers);
+
+        // clone partially uzip functionality
+        respReady.forEach(function(value){
+          for(let objKey in value) {
+            if(!(typeof value[objKey] == 'undefined' || value[objKey] === null)) {
+              value[objKey] = value[objKey].toString();
+            }
+          }
+        });
+
+        done(p, path, query, respReady);
+      },
+
+
+
+      _readCallbackSuccessDone: function(p, path, query, resp) {
+        //cache and resolve
+        FILE_CACHED[path] = resp;
+        this._parse(p, query, resp);
+        FILE_REQUESTED[path] = void 0;
+      },
+
 
       _parse: function (p, query, resp) {
         var data = resp;
-        // sorting
-        // one column, one direction (ascending) for now
 
         if(query.orderBy && data[0]) {
           if (data[0][query.orderBy]) {
@@ -297,6 +399,36 @@ export class WSReader {
 
         this._data = data;
         p.resolve();
+      },
+
+      _uzip: function (table, query) {
+        var header;
+        var rows = table.rows;
+        var headers = table.headers;
+        var result = new Array(rows.length);
+        let isKeys = query.key || [];
+        // unwrap compact data into json collection
+        for (var i = 0; i < rows.length; i++) {
+          result[i] = {};
+          for (var headerIndex = 0; headerIndex < headers.length; headerIndex++) {
+            header = headers[headerIndex];
+            result[i][header] = '';
+            if (!(typeof rows[i][headerIndex] == 'undefined' || rows[i][headerIndex] === null)) {
+              result[i][header] = rows[i][headerIndex].toString();
+            }
+            if (isKeys.indexOf(header) !== -1) {
+              result[i][header] = [result[i][header]];
+            }
+          }
+        }
+        return result;
+      },
+
+      _readCallbackError: function (p, path, query, resp) {
+        p.reject({
+          'message' : ERROR_NETWORK,
+          'data': path
+        });
       }
 
     };

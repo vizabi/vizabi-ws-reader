@@ -46,7 +46,7 @@ function __packDdfEntities(data) {
 }
 
 function __packDdfDatapoints(data) {
-  const entitiesNGram = _.size(data.entities.rows).toString(2).length;
+  const entitiesNGram = _.size(data.entities.rows).toString().length;
   const dimensions = _.map(data.datapoints.dimensions, (conceptIndex => data.concepts.values[conceptIndex]));
   const indicators = _.map(data.datapoints.indicators, (conceptIndex => data.concepts.values[conceptIndex]));
   const entityValues = _.map(data.entities.rows, row => data.entities.values[_.first(row)]);
@@ -56,7 +56,7 @@ function __packDdfDatapoints(data) {
   return _.map(rows, row => {
     const entitiesIndexes = _.chain(_.first(row))
       .chunk(entitiesNGram)
-      .mapValues(entityBitMask => parseInt(_.join(entityBitMask, ''), 2))
+      .mapValues(entityBitMask => parseInt(_.join(entityBitMask, ''), 10))
       .value();
 
     const datapoint = _.reduce(entitiesIndexes, (result, entityIndex, key) => {
