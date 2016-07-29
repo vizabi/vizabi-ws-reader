@@ -187,8 +187,8 @@ export class WSReader {
         // Checked :: Ok (new format)
         //_params.format = 'ddfJson';
         // Checked :: Ok (old format)
-        // _params.format = 'wsJson';
-        //_params.force = true;
+        _params.format = 'wsJson';
+        _params.force = true;
 
         // END :: test 3 type of Response Format
 
@@ -312,6 +312,7 @@ export class WSReader {
 
         let respReady = Utils.mapRows(this._uzip(resp.data || resp, query), this._parsers);
 
+        /*
         if(path.indexOf('entities') > -1) {
           let prefixKey = query.key[0];
           respReady.forEach(function (value, index) {
@@ -325,12 +326,13 @@ export class WSReader {
                 delete value[keyEntity];
               }
               if (keyEntity.indexOf("shape") > -1) {
-                let currValue = value[keyEntity];
+                let currValue = value[keyEntity] || 'M0,0 Z';
                 value[keyEntity] = "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 584.5 364.5'><path id='" + value[prefixKey] + "' d='" + currValue + "'/></svg>";
               }
             }
           });
         }
+        */
 
         done(p, path, query, respReady);
       },
@@ -416,9 +418,11 @@ export class WSReader {
             if (!(typeof rows[i][headerIndex] == 'undefined' || rows[i][headerIndex] === null)) {
               result[i][header] = rows[i][headerIndex].toString();
             }
+            /*
             if (isKeys.indexOf(header) !== -1) {
               result[i][header] = [result[i][header]];
             }
+            */
           }
         }
         return result;
