@@ -187,8 +187,8 @@ export class WSReader {
         // Checked :: Ok (new format)
         //_params.format = 'ddfJson';
         // Checked :: Ok (old format)
-        _params.format = 'wsJson';
-        _params.force = true;
+        //_params.format = 'wsJson';
+        //_params.force = true;
 
         // END :: test 3 type of Response Format
 
@@ -289,17 +289,17 @@ export class WSReader {
             });
           }
 
-          let respReady = Utils.mapRows(unpackedJson, self._parsers);
-
           // clone partially uzip functionality
 
-          respReady.forEach(function(value){
+          unpackedJson.forEach(function(value){
             for(let objKey in value) {
               if(!(typeof value[objKey] == 'undefined' || value[objKey] === null)) {
                 value[objKey] = value[objKey].toString();
               }
             }
           });
+
+          let respReady = Utils.mapRows(unpackedJson, self._parsers);
 
           delete query.key;
 
