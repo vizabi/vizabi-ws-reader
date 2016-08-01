@@ -3,6 +3,10 @@
   "version": "0.0.3",
   "description": "Vizabi WS reader",
   "main": "dist/bundle.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:VS-work/vizabi-ws-reader.git"
+  },
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --ignore-path .gitignore --ext js --fix . .config",
     "build": "npm run eslint && ./node_modules/.bin/webpack",
