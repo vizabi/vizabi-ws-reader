@@ -157,7 +157,7 @@ export class WSReader {
           // parse KEY
 
           if(typeof query.select.key != "undefined") {
-            resultObj["key"] = query.key.join(",");
+            resultObj["key"] = query.select.key.join(",");
           }
         }
 
