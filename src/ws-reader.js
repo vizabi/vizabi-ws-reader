@@ -361,12 +361,13 @@ export class WSReader {
           }
 
           if(path.indexOf('entities') > -1) {
-            let prefixKey = query.key[0];
+            let keyHolder = query.key ? query.key : query.select.key;
+            let prefixKey = keyHolder[0];
             unpackedJson.forEach(function(value, index){
               for(let keyEntity in value) {
                 if (
                   keyEntity.indexOf("shape") == -1 &&
-                  query.key.indexOf(keyEntity) == -1
+                  keyHolder.indexOf(keyEntity) == -1
                 ) {
                   let currValue = value[keyEntity];
                   value[prefixKey + '.' + keyEntity] = currValue;
@@ -499,7 +500,8 @@ export class WSReader {
         var rows = table.rows;
         var headers = table.headers;
         var result = new Array(rows.length);
-        let isKeys = query.key || [];
+        var keyHolder = query.key ? query.key : query.select.key;
+        let isKeys = keyHolder || [];
         // unwrap compact data into json collection
         for (var i = 0; i < rows.length; i++) {
           result[i] = {};
