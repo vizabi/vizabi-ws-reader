@@ -54,7 +54,7 @@ export class WSReader {
 
         // START :: improvements
 
-        var encodedQuery = this._encodeQuery(query);
+        var encodedQuery = (typeof query.from != "undefined") ? this._encodeQueryDDFQL(query) : this._encodeQuery(query);
         var path = this._basepath + '?' + encodedQuery;
 
         // END :: improvements
@@ -90,6 +90,97 @@ export class WSReader {
       },
 
       /* private */
+
+      _encodeQueryDDFQL: function(query) {
+
+        /*
+
+         // ?geo.cat=country,unstate&select=geo,geo.name,geo.world_4region
+         // ?geo.is--country=1&key=geo&select=geo,name,world_4region
+
+         query = {
+          from: "entities",
+          grouping: {
+            geo: undefined,
+            time: undefined
+          },
+          orderBy: null,
+          key: [
+            "geo",
+            "time"
+          ],
+          select: {
+            key: ["one", "two"],
+            value: [
+              "geo",
+              "geo.name",
+              "geo.world_4region"
+            ]
+          },
+          where: {
+            "geo.is--country": true
+          }
+        };
+
+        */
+
+        let resultObj = {};
+
+        // parse WHERE
+
+        if(typeof query.where != "undefined") {
+          for (let whereKey in query.where) {
+            if (query.where.hasOwnProperty(whereKey)) {
+              let valueReady = typeof query.where[whereKey] == '' ? query.where[whereKey] : query.where[whereKey];
+              resultObj[whereKey] = query.where[whereKey];
+            }
+          }
+        }
+
+        // parse SELECT
+
+        if(typeof query.select != "undefined") {
+
+          // parse SELECT values
+
+          if(typeof query.select.value != "undefined") {
+            let readySelect = [];
+            query.select.value.forEach(function(item, index, arraySelect) {
+              let selectParts = item.split(".");
+              let ready = selectParts.length > 1 ? selectParts[1] : selectParts[0];
+              readySelect.push(ready);
+            });
+            //resultObj["select"] = query.select.value.join(",");
+            resultObj["select"] = readySelect.join(",");
+          }
+
+          // parse KEY
+
+          if(typeof query.select.key != "undefined") {
+            resultObj["key"] = query.key.join(",");
+          }
+        }
+
+        // update path
+
+        const pathOldKey = 'old_path';
+        this._basepath = this._basepath
+          .split(this._predefined_path[pathOldKey])
+          .join(this._predefined_path[query.from]);
+
+        // encode query
+
+        let result = [];
+
+        Object.keys(resultObj).map(function (key) {
+          let value = QueryEncoder.encodeQuery(resultObj[key]);
+          if (value) {
+            result.push(key + '=' + value);
+          }
+        });
+
+        return result.join('&');
+      },
 
       _encodeQuery: function (query) {
 
