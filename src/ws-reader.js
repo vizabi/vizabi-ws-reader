@@ -169,14 +169,14 @@ export class WSReader {
             let prefixKey = keyHolder[0];
             unpackedJson.forEach(function(value, index){
               for(let keyEntity in value) {
-                if (
-                  keyEntity.indexOf("shape") == -1 &&
-                  keyHolder.indexOf(keyEntity) == -1
-                ) {
-                  let currValue = value[keyEntity];
-                  value[prefixKey + '.' + keyEntity] = currValue;
-                  delete value[keyEntity];
-                }
+//                if (
+//                  keyEntity.indexOf("shape") == -1 &&
+//                  keyHolder.indexOf(keyEntity) == -1
+//                ) {
+//                  let currValue = value[keyEntity];
+//                  value[prefixKey + '.' + keyEntity] = currValue;
+//                  delete value[keyEntity];
+//                }
                 if (keyEntity.indexOf("shape") > -1) {
                   let currValue = value[keyEntity];
                   value[keyEntity] = "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 584.5 364.5'><path id='" + value[prefixKey] + "' d='" + currValue + "'/></svg>";
