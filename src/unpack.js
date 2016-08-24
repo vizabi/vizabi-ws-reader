@@ -6,15 +6,19 @@ const _ = require('lodash');
 
 let Unpack = (data, cb) => {
 
-  if (_.get(data, 'datapoints.values.0', false)) {
+  if (_.get(data, 'datapoints.values.length', false)) {
     return cb(null, unpackDdfDatapoints(data));
   }
 
-  if (_.get(data, 'entities.values.0', false)) {
+  if (_.get(data, 'entities.values.length', false)) {
     return cb(null, unpackDdfEntities(data));
   }
 
-  return cb(null, unpackDdfConcepts(data));
+  if (_.get(data, 'concepts.values.length', false)) {
+    return cb(null, unpackDdfConcepts(data));
+  }
+
+  return cb('Nothing to unpack was found in a response');
 };
 module.exports = {Unpack};
 
