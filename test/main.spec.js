@@ -4,7 +4,7 @@ import _ from 'lodash';
 import test from 'ava';
 import td from 'testdouble';
 
-import {Utils} from './../src/utils';
+import {Utils} from '../src/vizabi-utils';
 import {WSReader} from './../src/ws-reader';
 
 test('Reader, simple test', t => {

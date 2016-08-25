@@ -113,5 +113,5 @@ function utils() {
   };
 }
 
-let Utils = new utils();
-module.exports = {Utils};
+let VizabiUtils = new utils();
+module.exports = {VizabiUtils};
