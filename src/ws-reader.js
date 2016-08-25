@@ -21,6 +21,6 @@ export class WSReader {
       READER_TYPES[readerType] :
       READER_TYPES['default'];
 
-    return new readerTypeConstructor();
+    return readerTypeConstructor;
   }
 }
