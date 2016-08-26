@@ -33,6 +33,41 @@ function WsReaderBase () {
       this._data = [];
     },
 
+    // /api/ddf/ql
+
+    read(query, language) {
+
+      const path = this._basepath + '?format=wsJson';
+
+      const vPromise = new VizabiPromise();
+      this._data = [];
+
+      //if cached, retrieve and parse
+      if (FILE_CACHED.hasOwnProperty(path)) {
+        this._parse(vPromise, query, FILE_CACHED[path]);
+        return vPromise;
+      }
+      //if requested by another hook, wait for the response
+      if (FILE_REQUESTED.hasOwnProperty(path)) {
+        return FILE_REQUESTED[path];
+      }
+      //if not, request and parse
+      FILE_REQUESTED[path] = vPromise;
+
+      VizabiUtils.postRequest(
+        path,
+        query,
+        this._readCallbackSuccess.bind(this, vPromise, path, query),
+        this._readCallbackError.bind(this, vPromise, path, query),
+        true
+      );
+
+      return vPromise;
+    },
+
+    /*
+      @deprecated
+
     read(query, language) {
 
       const vPromise = new VizabiPromise();
@@ -66,6 +101,7 @@ function WsReaderBase () {
 
       return vPromise;
     },
+    */
 
     getData() {
       return this._data;
