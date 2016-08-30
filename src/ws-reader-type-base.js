@@ -26,6 +26,14 @@ function WsReaderBase () {
       this._basepath = reader_info.path;
       this._parsers = reader_info.parsers;
 
+      // TEMP :: Fix for Vizabi
+      const correctPath = '/api/ddf/ql';
+      const oldPath = '/api/ddf';
+
+      this._basepath = this._basepath.indexOf(correctPath) === -1 ?
+        this._basepath.replace(oldPath, correctPath) :
+        this._basepath;
+
       if (!this._basepath) {
         VizabiUtils.error(this.CONST.ERROR_PARAM_PATH);
       }
@@ -33,26 +41,38 @@ function WsReaderBase () {
       this._data = [];
     },
 
-    // /api/ddf/ql
-
     read(query, language) {
 
       const path = this._basepath + '?format=wsJson';
 
+      /*
+      // TEMP :: Fix for WS
+      if(query.where && query.where['$and']) {
+        query.where['$and'][0] = _.mapKeys(query.where['$and'][0], (value, key) => {
+          if (_.startsWith(key, 'geo.')) {
+            return _.replace(key, 'geo.', '');
+          }
+          return key;
+        });
+      }
+      */
+
       const vPromise = new VizabiPromise();
       this._data = [];
 
+      const cachedPath = JSON.stringify(query);
+
       //if cached, retrieve and parse
-      if (FILE_CACHED.hasOwnProperty(path)) {
-        this._parse(vPromise, query, FILE_CACHED[path]);
+      if (FILE_CACHED.hasOwnProperty(cachedPath)) {
+        this._parse(vPromise, query, FILE_CACHED[cachedPath]);
         return vPromise;
       }
       //if requested by another hook, wait for the response
-      if (FILE_REQUESTED.hasOwnProperty(path)) {
-        return FILE_REQUESTED[path];
+      if (FILE_REQUESTED.hasOwnProperty(cachedPath)) {
+        return FILE_REQUESTED[cachedPath];
       }
       //if not, request and parse
-      FILE_REQUESTED[path] = vPromise;
+      FILE_REQUESTED[cachedPath] = vPromise;
 
       VizabiUtils.postRequest(
         path,
@@ -189,10 +209,12 @@ function WsReaderBase () {
 
     _readCallbackSuccessDone: function(vPromise, path, query, resp) {
       //cache and resolve
+      const cachedPath = JSON.stringify(query);
+
       this._addShapes(path, query, resp);
-      FILE_CACHED[path] = resp;
+      FILE_CACHED[cachedPath] = resp;
       this._parse(vPromise, query, resp);
-      FILE_REQUESTED[path] = void 0;
+      FILE_REQUESTED[cachedPath] = void 0;
     },
 
     _parse: function (vPromise, query, resp) {
