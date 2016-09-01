@@ -31,6 +31,7 @@ const config = {
 // pack for Web
 
 if (WEB) {
+  config.target = 'web';
   config.output.filename = 'bundle.web.js';
   config.output.libraryTarget = 'var';
   config.output.library = 'WSReader';
