@@ -153,7 +153,6 @@ function WsReaderBase () {
 
     _readCallbackSuccessDone: function(vPromise, path, query, resp) {
       //cache and resolve
-      this._addShapes(path, query, resp);
       FILE_CACHED[path] = resp;
       this._parse(vPromise, query, resp);
       FILE_REQUESTED[path] = void 0;
@@ -185,21 +184,6 @@ function WsReaderBase () {
         'data': path
       });
     },
-
-    _addShapes: function(path, query, respReady) {
-      if(path.indexOf('entities') > -1) {
-        let keyHolder = query.key ? query.key : query.select.key;
-        let prefixKey = keyHolder[0];
-        _.map(respReady, row => {
-          for(let keyEntity in row) {
-            if (keyEntity.indexOf("shape") > -1) {
-              let currValue = row[keyEntity];
-              row[keyEntity] = "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 584.5 364.5'><path id='" + row[prefixKey] + "' d='" + currValue + "'/></svg>";
-            }
-          }
-        });
-      }
-    }
 
   };
 }
