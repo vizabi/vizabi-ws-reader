@@ -13,9 +13,9 @@ WsReaderWsjson._encodeQueryDDFQLHook = function (encodedQuery) {
   return encodedQuery;
 };
 
-WsReaderWsjson._parseResponsePacked = function(vPromise, path, query, resp, done) {
+WsReaderWsjson._parseResponsePacked = function(resolve, reject, path, query, resp, done) {
   const respReady = VizabiUtils.mapRows(this._uzip(resp.data || resp), this._parsers);
-  done(vPromise, path, query, respReady);
+  done(resolve, reject, path, query, respReady);
 };
 
 WsReaderWsjson._uzip = function (table) {

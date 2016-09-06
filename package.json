@@ -19,6 +19,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "async-es": "2.0.0",
+    "bluebird": "3.4.6",
     "lodash": "4.13.1"
   },
   "devDependencies": {
