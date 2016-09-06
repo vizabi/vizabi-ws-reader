@@ -8,6 +8,7 @@ const WEB = JSON.parse(process.env.WEB_ENV || '0');
 const config = {
   entry: {'main-backend': './src/index.js'},
   target: 'node',
+  devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',

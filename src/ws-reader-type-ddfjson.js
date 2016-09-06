@@ -8,12 +8,12 @@ import {VizabiUtils} from './vizabi-utils';
 const WsReaderDdfjson = WsReaderBase();
 
 // Redefine Functionality
-WsReaderDdfjson._parseResponsePacked = function(vPromise, path, query, resp, done) {
+WsReaderDdfjson._parseResponsePacked = function(resolve, reject, path, query, resp, done) {
   const self = this;
   Unpack(resp, function (err, unpackedJson) {
     if(err) {
       VizabiUtils.error("Unpack error: ", err);
-      vPromise.reject({
+      reject({
         'message' : 'Unpack error',
         'data': err
       });
@@ -27,7 +27,7 @@ WsReaderDdfjson._parseResponsePacked = function(vPromise, path, query, resp, don
       }
     });
     const respReady = VizabiUtils.mapRows(unpackedJson, self._parsers);
-    done(vPromise, path, query, respReady);
+    done(resolve, reject, path, query, respReady);
   });
 };
 
