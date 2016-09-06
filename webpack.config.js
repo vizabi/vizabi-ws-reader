@@ -8,6 +8,7 @@ const WEB = JSON.parse(process.env.WEB_ENV || '0');
 const config = {
   entry: {'main-backend': './src/index.js'},
   target: 'node',
+  devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -31,6 +32,7 @@ const config = {
 // pack for Web
 
 if (WEB) {
+  config.target = 'web';
   config.output.filename = 'bundle.web.js';
   config.output.libraryTarget = 'var';
   config.output.library = 'WSReader';

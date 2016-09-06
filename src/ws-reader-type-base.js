@@ -1,9 +1,11 @@
 /* eslint-disable */
 
-import {VizabiPromise} from './vizabi-promise';
+
 import {QueryEncoder} from './query-encoder';
 import {VizabiUtils} from './vizabi-utils';
 import * as _ from 'lodash';
+
+const Promise = require("bluebird");
 
 const FILE_CACHED = {}; //caches files from this reader
 const FILE_REQUESTED = {}; //caches files from this reader
@@ -34,37 +36,25 @@ function WsReaderBase () {
     },
 
     read(query, language) {
+      var _this = this;
 
-      const vPromise = new VizabiPromise();
+      return new Promise(function (resolve, reject) {
+        let encodedQuery = _this._encodeQueryDDFQL(query);
 
-      let encodedQuery = this._encodeQueryDDFQL(query);
-      encodedQuery = this._encodeQueryDDFQLHook(encodedQuery);
+        encodedQuery = _this._encodeQueryDDFQLHook(encodedQuery);
 
-      const path = this._basepath + '?' + encodedQuery;
+        const path = _this._basepath + '?' + encodedQuery;
 
-      this._data = [];
+        _this._data = [];
 
-      //if cached, retrieve and parse
-      if (FILE_CACHED.hasOwnProperty(path)) {
-        this._parse(vPromise, query, FILE_CACHED[path]);
-        return vPromise;
-      }
-      //if requested by another hook, wait for the response
-      if (FILE_REQUESTED.hasOwnProperty(path)) {
-        return FILE_REQUESTED[path];
-      }
-      //if not, request and parse
-      FILE_REQUESTED[path] = vPromise;
-
-      VizabiUtils.getRequest(
-        path,
-        [],
-        this._readCallbackSuccess.bind(this, vPromise, path, query),
-        this._readCallbackError.bind(this, vPromise, path, query),
-        true
-      );
-
-      return vPromise;
+        VizabiUtils.getRequest(
+          path,
+          [],
+          _this._readCallbackSuccess.bind(_this, resolve, reject, path, query),
+          _this._readCallbackError.bind(_this, resolve, reject, path, query),
+          true
+        );
+      });
     },
 
     getData() {
@@ -133,33 +123,33 @@ function WsReaderBase () {
       return result.join('&');
     },
 
-    _readCallbackSuccess: function (vPromise, path, query, resp) {
+    _readCallbackSuccess: function (resolve, reject, path, query, resp) {
 
       if(typeof resp == 'object') {
-        return this._parseResponsePacked(vPromise, path, query, resp, this._readCallbackSuccessDone.bind(this));
+        return this._parseResponsePacked(resolve, reject, path, query, resp, this._readCallbackSuccessDone.bind(this));
       }
 
       VizabiUtils.error("Bad Response Format: " + path, resp);
-      vPromise.reject({
+      reject({
         'message' : this.CONST.ERROR_RESPONSE,
         'data': resp
       });
     },
 
     // SHOULD BE IMPLEMENTED IN CHILD CLASS
-    _parseResponsePacked: function(vPromise, path, query, resp, done) {
-      done(vPromise, path, query, resp);
+    _parseResponsePacked: function(resolve, reject, path, query, resp, done) {
+      done(resolve, reject, path, query, resp);
     },
 
-    _readCallbackSuccessDone: function(vPromise, path, query, resp) {
+    _readCallbackSuccessDone: function(resolve, reject, path, query, resp) {
       //cache and resolve
       this._addShapes(path, query, resp);
       FILE_CACHED[path] = resp;
-      this._parse(vPromise, query, resp);
+      this._parse(resolve, reject, query, resp);
       FILE_REQUESTED[path] = void 0;
     },
 
-    _parse: function (vPromise, query, resp) {
+    _parse: function (resolve, reject, query, resp) {
       var data = resp;
 
       if(query.orderBy && data[0]) {
@@ -168,7 +158,7 @@ function WsReaderBase () {
             return a[query.orderBy] - b[query.orderBy];
           });
         } else {
-          return vPromise.reject({
+          return reject({
             'message' : this.CONST.ERROR_ORDERING,
             'data': query.orderBy
           });
@@ -176,11 +166,11 @@ function WsReaderBase () {
       }
 
       this._data = data;
-      vPromise.resolve();
+      resolve();
     },
 
-    _readCallbackError: function (vPromise, path, query, resp) {
-      vPromise.reject({
+    _readCallbackError: function (resolve, reject, path, query, resp) {
+      reject({
         'message' : this.CONST.ERROR_NETWORK,
         'data': path
       });
