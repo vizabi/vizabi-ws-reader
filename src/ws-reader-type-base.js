@@ -48,8 +48,8 @@ function WsReaderBase () {
         VizabiUtils.postRequest(
           path,
           query,
-          this._readCallbackSuccess.bind(this, resolve, reject, path, query),
-          this._readCallbackError.bind(this, resolve, reject, path, query),
+          _this._readCallbackSuccess.bind(_this, resolve, reject, path, query),
+          _this._readCallbackError.bind(_this, resolve, reject, path, query),
           true
         );
       });
