@@ -102,10 +102,8 @@ function utils() {
     var request = new XMLHttpRequest();
     request.open(options.method, options.url, true);
     if (options.method === 'POST' && !options.json) {
-      console.log('application/x-www-form-urlencoded; charset=UTF-8');
       request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     } else if (options.method === 'POST' && options.json) {
-      console.log('application/json; charset=UTF-8');
       request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     }
     request.onload = function () {
@@ -126,7 +124,6 @@ function utils() {
         options.error();
       }
     };
-    console.log("options.data", options.data);
     request.send(options.data);
   };
 }
