@@ -6,7 +6,6 @@ import {WSReader} from 'src/dist/bundle';
 const wsReader = new WSReader();
 const wsReaderInst = wsReader.getReader();
 
-const language = 'en';
 const wsReaderConfig = {
   'parsers': {},
   'path': 'http://localhost:3000/',
@@ -20,7 +19,7 @@ const wsReaderQuery = {
 };
 
 wsReaderInst.init(wsReaderConfig);
-const wsResult = wsReaderInst.read(wsReaderQuery, language);
+const wsResult = wsReaderInst.read(wsReaderQuery);
 
 wsResult.then(function () {
   const wsReaderData = wsReaderInst.getData();

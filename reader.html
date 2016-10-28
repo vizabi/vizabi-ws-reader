@@ -14,7 +14,6 @@
     const wsReader = new WSReader.WSReader();
     const wsReaderInst = wsReader.getReader();
 
-    const language = 'en';
     const wsReaderConfig = {
         'parsers' : {},
         'path': "http://localhost:3000/api/ddf/datapoints",
@@ -35,7 +34,7 @@
 
 
     wsReaderInst.init(wsReaderConfig);
-    const wsResult = wsReaderInst.read(wsReaderQuery, language);
+    const wsResult = wsReaderInst.read(wsReaderQuery);
 
     wsResult.then(function () {
 

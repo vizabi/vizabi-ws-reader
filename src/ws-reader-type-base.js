@@ -39,7 +39,7 @@ function WsReaderBase () {
       this._data = [];
     },
 
-    read(query, language) {
+    read(query) {
       var _this = this;
       return  new Promise(function (resolve, reject) {
         const path = _this._basepath + '?format=wsJson';
