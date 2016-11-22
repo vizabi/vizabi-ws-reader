@@ -13,8 +13,8 @@ WsReaderWsjson._encodeQueryDDFQLHook = function (encodedQuery) {
   return encodedQuery;
 };
 
-WsReaderWsjson._parseResponsePacked = function(resolve, reject, path, query, resp, done) {
-  const respReady = VizabiUtils.mapRows(this._uzip(resp.data || resp), this._parsers);
+WsReaderWsjson._parseResponsePacked = function(resolve, reject, path, query, parsers, resp, done) {
+  const respReady = VizabiUtils.mapRows(this._uzip(resp.data || resp), parsers);
   done(resolve, reject, path, query, respReady);
 };
 

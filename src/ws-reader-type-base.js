@@ -20,9 +20,7 @@ function WsReaderBase () {
       };
 
       this._name = 'waffle';
-      this._data = [];
       this._basepath = reader_info.path;
-      this._parsers = reader_info.parsers;
 
       // TEMP :: Fix for Vizabi
       const correctPath = '/api/ddf/ql';
@@ -35,28 +33,21 @@ function WsReaderBase () {
       if (!this._basepath) {
         VizabiUtils.error(this.CONST.ERROR_PARAM_PATH);
       }
-
-      this._data = [];
     },
 
-    read(query) {
+    read(query, parsers = {}) {
       var _this = this;
       return  new Promise(function (resolve, reject) {
         const path = _this._basepath + '?format=wsJson';
-        _this._data = [];
 
         VizabiUtils.postRequest(
           path,
           query,
-          _this._readCallbackSuccess.bind(_this, resolve, reject, path, query),
+          _this._readCallbackSuccess.bind(_this, resolve, reject, path, query, parsers),
           _this._readCallbackError.bind(_this, resolve, reject, path, query),
           true
         );
       });
-    },
-
-    getData() {
-      return this._data;
     },
 
     /* private */
@@ -121,10 +112,10 @@ function WsReaderBase () {
       return result.join('&');
     },
 
-    _readCallbackSuccess: function (resolve, reject, path, query, resp) {
+    _readCallbackSuccess: function (resolve, reject, path, query, parsers, resp) {
 
       if(typeof resp == 'object') {
-        return this._parseResponsePacked(resolve, reject, path, query, resp, this._readCallbackSuccessDone.bind(this));
+        return this._parseResponsePacked(resolve, reject, path, query, parsers, resp, this._readCallbackSuccessDone.bind(this));
       }
 
       VizabiUtils.error("Bad Response Format: " + path, resp);
@@ -135,8 +126,8 @@ function WsReaderBase () {
     },
 
     // SHOULD BE IMPLEMENTED IN CHILD CLASS
-    _parseResponsePacked: function(resolve, reject, path, query, resp, done) {
-      done(resolve, reject, path, query, resp);
+    _parseResponsePacked: function(resolve, reject, path, query, parsers, resp, done) {
+      done(resolve, reject, path, query, parsers, resp);
     },
 
     _readCallbackSuccessDone: function(resolve, reject, path, query, resp) {
@@ -159,8 +150,7 @@ function WsReaderBase () {
         }
       }
 
-      this._data = data;
-      resolve();
+      resolve(data);
     },
 
     _readCallbackError: function (resolve, reject, path, query, resp) {
