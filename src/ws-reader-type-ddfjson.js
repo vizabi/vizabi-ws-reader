@@ -8,7 +8,7 @@ import {VizabiUtils} from './vizabi-utils';
 const WsReaderDdfjson = WsReaderBase();
 
 // Redefine Functionality
-WsReaderDdfjson._parseResponsePacked = function(resolve, reject, path, query, resp, done) {
+WsReaderDdfjson._parseResponsePacked = function(resolve, reject, path, query, parsers, resp, done) {
   const self = this;
   Unpack(resp, function (err, unpackedJson) {
     if(err) {
@@ -26,7 +26,7 @@ WsReaderDdfjson._parseResponsePacked = function(resolve, reject, path, query, re
         }
       }
     });
-    const respReady = VizabiUtils.mapRows(unpackedJson, self._parsers);
+    const respReady = VizabiUtils.mapRows(unpackedJson, parsers);
     done(resolve, reject, path, query, respReady);
   });
 };
