@@ -1,6 +1,6 @@
 {
   "name": "vizabi-ws-reader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vizabi WS reader",
   "main": "dist/bundle.js",
   "repository": {
@@ -13,7 +13,7 @@
     "build-common": "npm run eslint && ./node_modules/.bin/webpack",
     "build-web": "npm run eslint && WEB_ENV=1 ./node_modules/.bin/webpack",
     "test": "npm run build && ./node_modules/.bin/ava \"test/**/*.spec.js\"",
-    "prepublish": "npm run eslint && PROD_ENV=1 ./node_modules/.bin/webpack"
+    "prepublish": "npm run eslint && npm run build"
   },
   "author": "Valor-Software",
   "license": "GPL-3.0",
