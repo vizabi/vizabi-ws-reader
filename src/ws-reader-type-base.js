@@ -39,14 +39,25 @@ function WsReaderBase () {
       var _this = this;
       return  new Promise(function (resolve, reject) {
         const path = _this._basepath + '?format=wsJson';
+        const queryGet = JSON.stringify(query);
 
-        VizabiUtils.postRequest(
-          path,
-          query,
-          _this._readCallbackSuccess.bind(_this, resolve, reject, path, query, parsers),
-          _this._readCallbackError.bind(_this, resolve, reject, path, query),
-          true
-        );
+        if(queryGet.length > 4000) {
+          VizabiUtils.postRequest(
+            path,
+            query,
+            _this._readCallbackSuccess.bind(_this, resolve, reject, path, query, parsers),
+            _this._readCallbackError.bind(_this, resolve, reject, path, query),
+            true
+          );
+        } else {
+          VizabiUtils.getRequest(
+            path,
+            queryGet,
+            _this._readCallbackSuccess.bind(_this, resolve, reject, path, query, parsers),
+            _this._readCallbackError.bind(_this, resolve, reject, path, query),
+            true
+          );
+        }
       });
     },
 

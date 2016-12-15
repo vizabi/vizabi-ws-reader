@@ -63,15 +63,9 @@ function utils() {
     return original;
   }
 
-  function getRequest(url, pars, success, error, json) {
-    pars = pars || [];
-
-    forEach(pars, function (value, key) {
-      pars.push(key + '=' + value);
-    });
-
-    url += url.indexOf("?") == -1 ? '?' : '';
-    url += pars.length > 0 ? '&' + pars.join('&') : '';
+  function getRequest(url, queryStr, success, error, json) {
+    url += url.indexOf("?") === -1 ? '?' : '&';
+    url += 'query=' + queryStr;
 
     ajax({
       method: 'GET',
