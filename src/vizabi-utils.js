@@ -65,7 +65,7 @@ function utils() {
 
   function getRequest(url, queryStr, success, error, json) {
     url += url.indexOf("?") === -1 ? '?' : '&';
-    url += 'query=' + queryStr;
+    url += queryStr;
 
     ajax({
       method: 'GET',

@@ -1,6 +1,6 @@
 {
   "name": "vizabi-ws-reader",
-  "version": "0.1.1-1",
+  "version": "0.1.2",
   "description": "Vizabi WS reader",
   "main": "dist/bundle.js",
   "repository": {
@@ -20,7 +20,8 @@
   "dependencies": {
     "async-es": "2.0.0",
     "bluebird": "3.4.6",
-    "lodash": "4.13.1"
+    "lodash": "4.13.1",
+    "urlon": "2.0.1"
   },
   "devDependencies": {
     "ava": "0.15.2",

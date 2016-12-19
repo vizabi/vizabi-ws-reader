@@ -5,6 +5,7 @@ import {QueryEncoder} from './query-encoder';
 import {VizabiUtils} from './vizabi-utils';
 
 const Promise = require("bluebird");
+const Urlon = require("urlon");
 
 function WsReaderBase () {
 
@@ -38,8 +39,8 @@ function WsReaderBase () {
     read(query, parsers = {}) {
       var _this = this;
       return  new Promise(function (resolve, reject) {
-        const path = _this._basepath + '?format=wsJson';
-        const queryGet = JSON.stringify(query);
+        const path = _this._basepath;
+        const queryGet = Urlon.stringify(query);
 
         if(queryGet.length > 4000) {
           VizabiUtils.postRequest(
