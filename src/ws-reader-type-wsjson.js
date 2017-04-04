@@ -1,17 +1,16 @@
 /* eslint-disable */
 
 import {WsReaderBase} from './ws-reader-type-base';
-import * as _ from 'lodash';
+import _map from 'lodash/map';
+import _zipObject from 'lodash/zipObject';
+import _isObject from 'lodash/isObject';
+import _isNil from 'lodash/isNil';
 import {VizabiUtils} from './vizabi-utils';
 
 // Init Base Class
 const WsReaderWsjson = WsReaderBase();
 
 // Redefine Functionality
-WsReaderWsjson._encodeQueryDDFQLHook = function (encodedQuery) {
-  encodedQuery += '&format=wsJson';
-  return encodedQuery;
-};
 
 WsReaderWsjson._parseResponsePacked = function(resolve, reject, path, query, parsers, resp, done) {
   const respReady = VizabiUtils.mapRows(this._uzip(resp.data || resp), parsers);
@@ -21,12 +20,12 @@ WsReaderWsjson._parseResponsePacked = function(resolve, reject, path, query, par
 WsReaderWsjson._uzip = function (table) {
   const rows = table.rows;
   const headers = table.headers;
-  return _.map(rows, row => {
-    return _.zipObject(headers, _.map(row, cell => {
-      if(_.isObject(cell)) {
+  return _map(rows, row => {
+    return _zipObject(headers, _map(row, cell => {
+      if(_isObject(cell)) {
         return JSON.stringify(cell);
       }
-      return !_.isNil(cell) ? cell.toString() : null;
+        return _isNil(cell) ? null : cell.toString();
     }));
   });
 };

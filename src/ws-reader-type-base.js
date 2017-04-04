@@ -1,8 +1,9 @@
 /* eslint-disable */
 
-
-import {QueryEncoder} from './query-encoder';
 import {VizabiUtils} from './vizabi-utils';
+import _isString from 'lodash/isString';
+import _isObject from 'lodash/isObject';
+import _extend from 'lodash/extend';
 
 const Promise = require("bluebird");
 const Urlon = require("urlon");
@@ -38,6 +39,11 @@ function WsReaderBase () {
 
     read(query, parsers = {}) {
       var _this = this;
+
+      if (_isString(query.dataset)) {
+        query = _extend({}, query, {dataset: encodeURIComponent(query.dataset)});
+      }
+
       return  new Promise(function (resolve, reject) {
         const path = _this._basepath;
         const queryGet = Urlon.stringify(query);
@@ -68,65 +74,9 @@ function WsReaderBase () {
       return encodedQuery;
     },
 
-    _encodeQueryDDFQL: function(query) {
-
-      let resultObj = {};
-
-      // parse WHERE
-
-      if(typeof query.where != "undefined") {
-        for (let whereKey in query.where) {
-          if (query.where.hasOwnProperty(whereKey)) {
-            let valueReady = typeof query.where[whereKey] == '' ? query.where[whereKey] : query.where[whereKey];
-            resultObj[whereKey] = query.where[whereKey];
-          }
-        }
-      }
-
-      // parse SELECT
-
-      if(typeof query.select != "undefined") {
-
-        // parse SELECT values
-
-        if(typeof query.select.value != "undefined") {
-          let readySelect = [];
-          query.select.value.forEach(function(item, index, arraySelect) {
-            let selectParts = item.split(".");
-            let ready = selectParts.length > 1 ? selectParts[1] : selectParts[0];
-            readySelect.push(ready);
-          });
-          resultObj["select"] = readySelect.join(",");
-        }
-
-        // parse KEY
-
-        if(typeof query.select.key != "undefined") {
-          resultObj["key"] = query.select.key.join(",");
-        }
-      }
-
-      // update path
-
-      this._basepath += query.from;
-
-      // encode query
-
-      let result = [];
-
-      Object.keys(resultObj).map(function (key) {
-        let value = QueryEncoder.encodeQuery(resultObj[key]);
-        if (value) {
-          result.push(key + '=' + value);
-        }
-      });
-
-      return result.join('&');
-    },
-
     _readCallbackSuccess: function (resolve, reject, path, query, parsers, resp) {
 
-      if(typeof resp == 'object') {
+      if(_isObject(resp)) {
         return this._parseResponsePacked(resolve, reject, path, query, parsers, resp, this._readCallbackSuccessDone.bind(this));
       }
 
