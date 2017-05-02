@@ -1,8 +1,8 @@
 {
   "name": "vizabi-ws-reader",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Vizabi WS reader",
-  "main": "dist/bundle.js",
+  "main": "dist/vizabi-ws-reader-node.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com:VS-work/vizabi-ws-reader.git"

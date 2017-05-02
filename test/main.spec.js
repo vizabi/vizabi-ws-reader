@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import test from 'ava';
 
-import {WSReader} from './../dist/bundle';
+import {WSReader} from './../dist/vizabi-ws-reader-node';
 
 test('Reader, simple test', t => {
 
