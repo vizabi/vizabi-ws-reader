@@ -11,7 +11,7 @@ const config = {
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: 'vizabi-ws-reader-node.js',
     libraryTarget: 'commonjs2'
   },
   module: {
@@ -33,7 +33,7 @@ const config = {
 
 if (WEB) {
   config.target = 'web';
-  config.output.filename = 'bundle.web.js';
+  config.output.filename = 'vizabi-ws-reader.js';
   config.output.libraryTarget = 'var';
   config.output.library = 'WSReader';
 }
