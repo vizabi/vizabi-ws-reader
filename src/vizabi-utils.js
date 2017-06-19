@@ -1,7 +1,6 @@
 /* eslint-disable */
 
 import isArray from 'lodash/isArray';
-import forEach from 'lodash/forEach';
 
 // from Vizabi Lib ...
 
@@ -64,8 +63,9 @@ function utils() {
   }
 
   function getRequest(url, queryStr, success, error, json) {
-    url += url.indexOf("?") === -1 ? '?' : '&';
-    url += queryStr;
+    if (queryStr) {
+      url += (url.indexOf("?") === -1 ? `?${queryStr}` : `&${queryStr}`);
+    }
 
     ajax({
       method: 'GET',
