@@ -3,3 +3,5 @@
 test/
 node_modules/
 webpack.config.js
+coverage
+.nyc_output
