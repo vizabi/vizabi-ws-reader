@@ -1,3 +1,8 @@
-import {WSReader} from './ws-reader';
+import { WsJsonReader } from './ws-reader-wsjson';
+import { BaseWsReader } from './ws-reader-base';
 
-module.exports = {WSReader};
+export const WsReader = {
+  getReader() {
+    return Object.assign({}, BaseWsReader, WsJsonReader);
+  }
+};

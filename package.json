@@ -12,7 +12,7 @@
     "build": "npm run build-common && npm run build-web",
     "build-common": "npm run eslint && ./node_modules/.bin/webpack",
     "build-web": "npm run eslint && WEB_ENV=1 ./node_modules/.bin/webpack",
-    "test": "NODE_ENV=test nyc mocha test/**/*.spec.js",
+    "test": "NODE_ENV=test nyc mocha --compilers js:babel-core/register test/**/*.spec.js",
     "prepublish": "npm run eslint && npm run build",
     "precommit": "npm run eslint && npm t"
   },
@@ -38,9 +38,9 @@
   },
   "dependencies": {
     "async-es": "2.0.0",
-    "bluebird": "3.4.6",
     "lodash": "4.13.1",
-    "urlon": "2.0.1"
+    "urlon": "2.0.1",
+    "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
     "babel": "^6.0.15",
@@ -50,7 +50,7 @@
     "babel-register": "6.24.1",
     "chai": "4.0.2",
     "eslint": "3.0.1",
-    "eslint-config-valorsoft": "0.0.16",
+    "eslint-config-valorsoft": "0.1.0",
     "husky": "0.13.4",
     "mocha": "3.4.2",
     "nyc": "11.0.2",

@@ -2,12 +2,23 @@
   "extends": "./node_modules/eslint-config-valorsoft/.eslintrc.json",
   "env": {
     "node": true,
-    "es6": true
+    "es6": true,
+    "browser": true
   },
   "parserOptions": {
     "sourceType": "module"
   },
   "rules": {
+    "arrow-body-style": "off",
+    "max-len": [2, 200],
+    "no-unused-vars": ["error", { "args": "none" }],
+    "no-console": "off",
+    "camelcase": "off",
+    "func-names": "off",
+    "no-invalid-this": "off",
+    "object-curly-spacing": ["error", "always"],
+    "no-underscore-dangle": "off",
+    "sort-imports": "off",
     "id-length": [
       "error",
       {

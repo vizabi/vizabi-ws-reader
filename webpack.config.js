@@ -6,7 +6,7 @@ const PROD = JSON.parse(process.env.PROD_ENV || '0');
 const WEB = JSON.parse(process.env.WEB_ENV || '0');
 
 const config = {
-  entry: {'main-backend': './src/index.js'},
+  entry: { 'main-backend': './src/index.js' },
   target: 'node',
   devtool: 'source-map',
   output: {
@@ -22,10 +22,10 @@ const config = {
       }
     ]
   },
-  resolve: {extensions: ['', '.js']},
+  resolve: { extensions: ['', '.js'] },
   profile: true,
   plugins: PROD ? [
-    new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
+    new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } })
   ] : []
 };
 
