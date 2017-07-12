@@ -1,9 +1,9 @@
-const webpack = require('webpack');
-const path = require('path');
-
 /* eslint-disable no-process-env */
-const PROD = JSON.parse(process.env.PROD_ENV || '0');
-const WEB = JSON.parse(process.env.WEB_ENV || '0');
+
+const path = require('path');
+const webpack = require('webpack');
+
+const WEB = process.env.WEB_ENV;
 
 const config = {
   entry: { 'main-backend': './src/index.js' },
@@ -15,21 +15,17 @@ const config = {
     libraryTarget: 'commonjs2'
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['babel']
+        loaders: ['babel-loader']
       }
     ]
   },
-  resolve: { extensions: ['', '.js'] },
+  resolve: { extensions: ['.js'] },
   profile: true,
-  plugins: PROD ? [
-    new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } })
-  ] : []
+  plugins: [new webpack.optimize.UglifyJsPlugin()]
 };
-
-// pack for Web
 
 if (WEB) {
   config.target = 'web';

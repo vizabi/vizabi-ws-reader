@@ -14,14 +14,14 @@ const ERRORS = {
 };
 
 export const BaseWsReader = {
-  init(readerInfo) {
+  init(readerInfo = {}) {
     this._name = 'waffle';
     this._dataset = readerInfo.dataset;
     this._assetsPath = trimEnd(readerInfo.assetsPath || '/api/ddf/assets', '/');
     this._basepath = readerInfo.path;
 
     if (!this._basepath) {
-      ReaderUtils.logError(ERRORS.PARAM_PATH);
+      console.error(ERRORS.PARAM_PATH);
     }
   },
 
@@ -81,27 +81,20 @@ export const BaseWsReader = {
       });
   },
 
-  _onReadError({ endpoint, ddfql, error } = {}) {
-    const errorDescription = {
-      message: `
-        ${error}
-
-        FAILED QUERY: ${JSON.stringify(ddfql)}
-      `,
-      data: endpoint
-    };
-
-    ReaderUtils.logError(ReaderUtils.toErrorResponse(errorDescription));
+  _onReadError({ endpoint, ddfql, error }) {
+    return Promise.reject({
+      error,
+      data: {
+        endpoint,
+        ddfql
+      }
+    });
   },
 
-  _onReadSuccess({ endpoint, parsers, response } = {}) {
+  _onReadSuccess({ parsers, response }) {
     if (!isObject(response)) {
       const errorDescription = {
-        message: `
-          ${ERRORS.RESPONSE}: ${endpoint}
-          
-          RESPONSE: ${response}
-        `,
+        message: `${ERRORS.RESPONSE}: ${response}`,
         data: response
       };
 

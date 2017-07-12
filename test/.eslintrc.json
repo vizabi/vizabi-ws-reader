@@ -12,18 +12,14 @@
         ]
       }
     ],
+    "no-undefined": "off",
+    "id-length": "off",
+    "max-lines": "off",
+    "no-magic-numbers": ["error", { "ignoreArrayIndexes": true, "ignore": [-1, 0, 1]}],
+    "init-declarations": "off",
     "no-sync": 0,
+    "prefer-arrow-callback": "off",
     "newline-per-chained-call": 0,
-    "no-unused-expressions": 0,
-    "no-magic-numbers": [
-      2,
-      {
-        "ignore": [
-          -1,
-          0,
-          1
-        ]
-      }
-    ]
+    "no-unused-expressions": 0
   }
 }

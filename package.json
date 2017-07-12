@@ -9,7 +9,7 @@
   },
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --ignore-path .gitignore --ext js --fix . .config",
-    "build": "npm run build-common && npm run build-web",
+    "build": "PROD=1 npm run build-common && npm run build-web",
     "build-common": "npm run eslint && ./node_modules/.bin/webpack",
     "build-web": "npm run eslint && WEB_ENV=1 ./node_modules/.bin/webpack",
     "test": "NODE_ENV=test nyc mocha --compilers js:babel-core/register test/**/*.spec.js",
@@ -43,10 +43,10 @@
     "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
-    "babel": "^6.0.15",
-    "babel-loader": "6.2.4",
+    "babel": "6.23.0",
+    "babel-loader": "7.1.1",
     "babel-plugin-istanbul": "4.1.4",
-    "babel-preset-es2015": "^6.1.2",
+    "babel-preset-es2015": "6.24.1",
     "babel-register": "6.24.1",
     "chai": "4.0.2",
     "eslint": "3.0.1",
@@ -56,7 +56,6 @@
     "nyc": "11.0.2",
     "sinon": "2.3.4",
     "sinon-test": "1.0.2",
-    "testdouble": "^1.6.0",
-    "webpack": "^1.12.3"
+    "webpack": "3.2.0"
   }
 }

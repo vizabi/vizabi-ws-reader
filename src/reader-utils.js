@@ -1,55 +1,26 @@
 import isArray from 'lodash/isArray';
+import identity from 'lodash/identity';
 import 'whatwg-fetch';
 
-function logError(... message) {
-  console.error(... message);
-}
-
-function mapRow(value, fmt) {
+function mapRow(value, fmt = identity) {
   if (!isArray(value)) {
     return fmt(value);
   }
   return value.map(current => mapRow(current, fmt));
 }
 
-function toErrorResponse({ message, data } = {}) {
-  return {
-    message,
-    data,
-    toString() {
-      return this.message;
-    }
-  };
-}
-
-function mapRows(original, formatters) {
-  // default formatter turns empty strings in null and converts numeric values into number
-  const defaultFormatter = val => {
-    let newVal = val;
-
-    if (val === '') {
-      newVal = null;
-    } else {
-      const numericVal = parseFloat(val);
-
-      if (!isNaN(numericVal) && isFinite(val)) {
-        newVal = numericVal;
-      }
-    }
-    return newVal;
-  };
-
+function mapRows(original, formatters = {}) {
   return original.map(row => {
     Object.keys(row).forEach(column => {
-      row[column] = mapRow(row[column], formatters[column] || defaultFormatter);
+      row[column] = mapRow(row[column], formatters[column]);
     });
 
     return row;
   });
 }
 
-function ajax(options) {
-  const { url = '', method = 'GET', json = false } = options;
+function ajax(options = {}) {
+  const { url = '', json = false } = options;
 
   const headers = {};
 
@@ -57,7 +28,7 @@ function ajax(options) {
     headers['Content-Type'] = 'application/json; charset=UTF-8';
   }
 
-  return fetch(url, { method, headers })
+  return fetch(url, { method: 'GET', headers })
     .then(response => {
       if (!response.ok) {
         throw Error(response.statusText);
@@ -73,8 +44,6 @@ function ajax(options) {
 }
 
 export {
-  logError,
   mapRows,
-  ajax,
-  toErrorResponse
+  ajax
 };
