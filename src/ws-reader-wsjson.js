@@ -2,14 +2,9 @@ import map from 'lodash/map';
 import zipObject from 'lodash/zipObject';
 import isObject from 'lodash/isObject';
 import isNil from 'lodash/isNil';
-import * as ReaderUtils from './reader-utils';
 
 export const WsJsonReader = {
-  _parse(wsJson, parsers) {
-    return Promise.resolve(ReaderUtils.mapRows(this._uzip(wsJson), parsers));
-  },
-
-  _uzip(wsJson) {
+  _toPojo(wsJson) {
     const rows = wsJson.rows;
     const headers = wsJson.headers;
 

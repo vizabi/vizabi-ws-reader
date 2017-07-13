@@ -3,15 +3,15 @@ import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
 import * as ReaderUtils from '../src/reader-utils';
 
-import { BaseWsReader } from '../src/ws-reader-base';
+import { WsReader } from '../src';
 
 sinon.test = sinonTest.configureTest(sinon);
 
 let wsReader;
 
-describe('BaseWsReader', () => {
+describe('WsReader', () => {
   beforeEach(() => {
-    wsReader = Object.assign({}, BaseWsReader);
+    wsReader = WsReader.getReader();
   });
 
   describe('init', () => {
@@ -292,13 +292,31 @@ describe('BaseWsReader', () => {
       wsReader.init(wsReaderConfig);
 
       const response = {
-        headers: ['dimension1', 'dimension2', 'indicator'],
+        headers: ['a', 'b', 'c'],
         rows: [
-          ['dim1', 'dim2', 'val1'],
-          ['dim3', 'dim4', 'val2'],
-          ['dim5', 'dim6', 'val3']
+          ['a1', { hello: 'world' }, 'c1'],
+          ['a2', null, 'c2'],
+          ['a3', 'b3', undefined]
         ]
       };
+
+      const parsedResponse = [
+        {
+          a: 'a1',
+          b: '{"hello":"world"}',
+          c: 'c1'
+        },
+        {
+          a: 'a2',
+          b: null,
+          c: 'c2'
+        },
+        {
+          a: 'a3',
+          b: 'b3',
+          c: null
+        }
+      ];
 
       const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
 
@@ -314,7 +332,7 @@ describe('BaseWsReader', () => {
           ]
         }
       }).then(actualResponse => {
-        expect(actualResponse).to.deep.equal(response);
+        expect(actualResponse).to.deep.equal(parsedResponse);
 
         sinon.assert.calledOnce(ajaxStub);
         sinon.assert.calledWith(ajaxStub, {

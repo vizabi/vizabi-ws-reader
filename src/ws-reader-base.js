@@ -55,6 +55,16 @@ export const BaseWsReader = {
     });
   },
 
+  _toDatasetPath(dataset = 'default') {
+    if (dataset === 'default') {
+      return dataset;
+    }
+
+    const [path, branch = 'master'] = split(dataset, '#');
+
+    return path ? `${path}/${branch}` : 'default';
+  },
+
   read(query, parsers = {}) {
     const ddfql = isString(query.dataset)
       ? Object.assign({}, query, { dataset: encodeURIComponent(query.dataset) })
@@ -105,16 +115,10 @@ export const BaseWsReader = {
   },
 
   _parse(response, parsers) {
-    return Promise.resolve(response);
+    return ReaderUtils.mapRows(this._toPojo(response), parsers);
   },
 
-  _toDatasetPath(dataset = 'default') {
-    if (dataset === 'default') {
-      return dataset;
-    }
-
-    const [path, branch = 'master'] = split(dataset, '#');
-
-    return path ? `${path}/${branch}` : 'default';
+  _toPojo(response) {
+    return response;
   }
 };
