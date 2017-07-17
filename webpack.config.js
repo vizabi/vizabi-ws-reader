@@ -31,7 +31,7 @@ if (WEB) {
   config.target = 'web';
   config.output.filename = 'vizabi-ws-reader.js';
   config.output.libraryTarget = 'var';
-  config.output.library = 'WSReader';
+  config.output.library = 'WsReader';
 }
 
 module.exports = config;
