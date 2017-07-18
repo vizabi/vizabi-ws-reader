@@ -1,5 +1,4 @@
 import isArray from 'lodash/isArray';
-import identity from 'lodash/identity';
 import 'whatwg-fetch';
 
 function mapRows(original, formatters = {}) {
