@@ -37,40 +37,37 @@ describe('ReaderUtils', () => {
     it('formats cells with the formatter given per key', sinon.test(function () {
       const input = [
         {
-          a: 'a1',
-          b: 'b1',
+          a: Infinity,
+          b: '1b',
           c: 'c1'
         },
         {
-          a: 'a2',
-          b: 'b2',
+          a: NaN,
+          b: '2',
           c: 'c2'
         },
         {
-          a: 'a3',
+          a: 'Hello',
           b: 'b3',
           c: ['c3.1', 'c3.2', 'c3.3']
         }
       ];
 
-      const actual = ReaderUtils.mapRows(input, {
-        a: val => 'Boo!',
-        c: val => 'Foo!'
-      });
+      const actual = ReaderUtils.mapRows(input, { c: val => 'Foo!' });
 
       const expected = [
         {
-          a: 'Boo!',
-          b: 'b1',
+          a: Infinity,
+          b: 1,
           c: 'Foo!'
         },
         {
-          a: 'Boo!',
-          b: 'b2',
+          a: NaN,
+          b: 2,
           c: 'Foo!'
         },
         {
-          a: 'Boo!',
+          a: 'Hello',
           b: 'b3',
           c: [
             'Foo!',

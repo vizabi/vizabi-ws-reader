@@ -2,13 +2,6 @@ import isArray from 'lodash/isArray';
 import identity from 'lodash/identity';
 import 'whatwg-fetch';
 
-function mapRow(value, fmt = identity) {
-  if (!isArray(value)) {
-    return fmt(value);
-  }
-  return value.map(current => mapRow(current, fmt));
-}
-
 function mapRows(original, formatters = {}) {
   return original.map(row => {
     Object.keys(row).forEach(column => {
@@ -17,6 +10,19 @@ function mapRows(original, formatters = {}) {
 
     return row;
   });
+}
+
+function mapRow(value, fmt = parseByDefault) {
+  if (!isArray(value)) {
+    return fmt(value);
+  }
+  return value.map(current => mapRow(current, fmt));
+}
+
+function parseByDefault(value) {
+  const parsedValue = parseFloat(value);
+
+  return isNaN(parsedValue) || !isFinite(parsedValue) ? value : parsedValue;
 }
 
 function ajax(options = {}) {
