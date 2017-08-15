@@ -40,6 +40,38 @@ describe('WsReader', () => {
       expect(wsReader._assetsPath).to.equal('/path/to/assets');
       expect(wsReader._basepath).to.equal('https://waffle.gapminder.org');
     }));
+
+    it('populates versionInfo property with build info', sinon.test(function () {
+      global.READER_VERSION = '1.0-custom';
+      global.READER_BUILD_TIMESTAMP = 12121212;
+
+      wsReader.init({
+        dataset: 'myDataset',
+        assetsPath: '/path/to/assets/',
+        path: 'https://waffle.gapminder.org'
+      });
+
+      expect(wsReader.versionInfo).to.deep.equal({
+        version: '1.0-custom',
+        build: 12121212
+      });
+
+      Reflect.deleteProperty(global, 'READER_VERSION');
+      Reflect.deleteProperty(global, 'READER_BUILD_TIMESTAMP');
+    }));
+
+    it('populates versionInfo property with build info: uses fallback values if given globals are not defined', sinon.test(function () {
+      wsReader.init({
+        dataset: 'myDataset',
+        assetsPath: '/path/to/assets/',
+        path: 'https://waffle.gapminder.org'
+      });
+
+      expect(wsReader.versionInfo).to.deep.equal({
+        version: 'development',
+        build: 7777777777777
+      });
+    }));
   });
 
   describe('getAsset', () => {

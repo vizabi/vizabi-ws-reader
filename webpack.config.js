@@ -2,6 +2,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const pkg = require('./package.json');
 
 const WEB = process.env.WEB_ENV;
 
@@ -24,7 +25,13 @@ const config = {
   },
   resolve: { extensions: ['.js'] },
   profile: true,
-  plugins: [new webpack.optimize.UglifyJsPlugin()]
+  plugins: [
+    new webpack.DefinePlugin({
+      READER_VERSION: JSON.stringify(pkg.version),
+      READER_BUILD_TIMESTAMP: JSON.stringify(Date.now())
+    }),
+    new webpack.optimize.UglifyJsPlugin()
+  ]
 };
 
 if (WEB) {

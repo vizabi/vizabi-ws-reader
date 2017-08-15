@@ -8,6 +8,10 @@
   "parserOptions": {
     "sourceType": "module"
   },
+  "globals": {
+    "READER_VERSION": true,
+    "READER_BUILD_TIMESTAMP": true
+  },
   "rules": {
     "arrow-body-style": "off",
     "max-len": [2, 200],

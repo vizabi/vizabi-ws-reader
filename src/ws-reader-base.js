@@ -13,12 +13,20 @@ const ERRORS = {
   PARAM_PATH: 'There is no base path for waffle reader, please, consider to provide one'
 };
 
+const READER_VERSION_FALLBACK = 'development';
+const READER_BUILD_TIMESTAMP_FALLBACK = 7777777777777;
+
 export const BaseWsReader = {
   init(readerInfo = {}) {
     this._name = 'waffle';
     this._dataset = readerInfo.dataset;
     this._assetsPath = trimEnd(readerInfo.assetsPath || '/api/ddf/assets', '/');
     this._basepath = readerInfo.path;
+
+    this.versionInfo = {
+      version: typeof READER_VERSION === 'undefined' ? READER_VERSION_FALLBACK : READER_VERSION,
+      build: typeof READER_BUILD_TIMESTAMP === 'undefined' ? READER_BUILD_TIMESTAMP_FALLBACK : READER_BUILD_TIMESTAMP
+    };
 
     if (!this._basepath) {
       console.error(ERRORS.PARAM_PATH);
