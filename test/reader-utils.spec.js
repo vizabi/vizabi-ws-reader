@@ -58,7 +58,7 @@ describe('ReaderUtils', () => {
       const expected = [
         {
           a: Infinity,
-          b: 1,
+          b: '1b',
           c: 'Foo!'
         },
         {

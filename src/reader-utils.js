@@ -19,6 +19,16 @@ function mapRow(value, fmt = parseByDefault) {
 }
 
 function parseByDefault(value) {
+  if (value === '' || value === null) {
+    return null;
+  }
+  if (!value.trim) {
+    return value;
+  }
+  if (value.trim().match(/^[0-9.,]+$/) == null) {
+    return value;
+  }
+
   const parsedValue = parseFloat(value);
 
   return isNaN(parsedValue) || !isFinite(parsedValue) ? value : parsedValue;
