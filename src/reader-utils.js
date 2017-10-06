@@ -40,7 +40,7 @@ function ajax(options = {}) {
   const headers = {};
 
   if (json) {
-    headers['Content-Type'] = 'application/json; charset=UTF-8';
+    headers['Content-Type'] = 'text/plain; charset=UTF-8';
   }
 
   return fetch(url, { method: 'GET', headers })

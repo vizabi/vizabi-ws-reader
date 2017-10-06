@@ -120,7 +120,7 @@ describe('ReaderUtils', () => {
       return ReaderUtils.ajax({ url: '/server', json: true }).then(response => {
         sinon.assert.calledWithExactly(global.fetch, '/server', {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json; charset=UTF-8' }
+          headers: { 'Content-Type': 'text/plain; charset=UTF-8' }
         });
 
         expect(response).to.deep.equal({ hello: 'world!' });
