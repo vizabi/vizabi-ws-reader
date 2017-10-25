@@ -78,6 +78,10 @@ export const BaseWsReader = {
       ? Object.assign({}, query, { dataset: encodeURIComponent(query.dataset) })
       : query;
 
+    if (this.onReadHook) {
+      this.onReadHook(query, 'request');
+    }
+
     return ReaderUtils.ajax({ url: `${this._basepath}?${Urlon.stringify(ddfql)}`, json: true })
       .then(response => {
         const options = {
@@ -85,6 +89,13 @@ export const BaseWsReader = {
           parsers,
           endpoint: this._basepath
         };
+
+        if (this.onReadHook) {
+          const { from, select } = query;
+          const { response: { rows } } = options;
+
+          this.onReadHook({ from, select, responseLength: rows.length }, 'response');
+        }
 
         return this._onReadSuccess(options);
       })

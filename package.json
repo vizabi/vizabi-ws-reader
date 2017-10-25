@@ -1,6 +1,6 @@
 {
   "name": "vizabi-ws-reader",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Vizabi WS reader",
   "main": "dist/vizabi-ws-reader-node.js",
   "repository": {
