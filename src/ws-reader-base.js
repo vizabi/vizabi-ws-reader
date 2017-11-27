@@ -17,11 +17,21 @@ const READER_VERSION_FALLBACK = 'development';
 const READER_BUILD_TIMESTAMP_FALLBACK = 7777777777777;
 
 export const BaseWsReader = {
+
+  /**
+  * @param {object} readerInfo
+  *  contains 'dataset' (in a format GITHUB_ACCOUNT_NAME/REPOSITORY#BRANCH)
+  *  contains 'path' (in a format https://waffle-server-dev.gapminderdev.org/api/ddf/ql)
+  *  contains 'assetsPath' (in a format https://import-waffle-server-dev.gapminderdev.org/api/ddf/assets/)
+  *  may contain 'dataset_access_token' for private repos
+  **/
+
   init(readerInfo = {}) {
     this._name = 'waffle';
     this._dataset = readerInfo.dataset;
     this._assetsPath = trimEnd(readerInfo.assetsPath || '/api/ddf/assets', '/');
     this._basepath = readerInfo.path;
+    this._dataset_access_token = readerInfo.dataset_access_token;
 
     this.versionInfo = {
       version: typeof READER_VERSION === 'undefined' ? READER_VERSION_FALLBACK : READER_VERSION,
@@ -39,8 +49,8 @@ export const BaseWsReader = {
    *  - asset that needs to be requested.
    *
    * @param {object} options
-   *  - might contain 'dataset' (in a format GITHUB_ACCOUNT_NAME/REPOSITORY#BRANCH)
-   *  and 'dataset_access_token' (for private repos) properties.
+   *  - may contain 'dataset' (in a format GITHUB_ACCOUNT_NAME/REPOSITORY#BRANCH) if it wasn't defined on init
+   *  - may contain 'dataset_access_token' for private repos
    *
    * @returns {Promise} - once resolved
    *  - asset in a json or text format will be available via this Promise.
@@ -53,7 +63,7 @@ export const BaseWsReader = {
 
     const isJsonAsset = endsWith(trimmedAsset, '.json');
 
-    const queryString = options.dataset_access_token ? `dataset_access_token=${options.dataset_access_token}` : '';
+    const queryString = options.dataset_access_token || this._dataset_access_token ? `dataset_access_token=${options.dataset_access_token || this._dataset_access_token}` : '';
 
     const url = `${this._assetsPath}/${datasetPath}/${trimmedAsset}`;
 
@@ -77,6 +87,10 @@ export const BaseWsReader = {
     const ddfql = isString(query.dataset)
       ? Object.assign({}, query, { dataset: encodeURIComponent(query.dataset) })
       : query;
+
+    if (this._dataset_access_token) {
+      ddfql.dataset_access_token = this._dataset_access_token;
+    }
 
     if (this.onReadHook) {
       this.onReadHook(query, 'request');
