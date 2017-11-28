@@ -2,8 +2,10 @@
 
 Example of adding the compiled WS reader to a web page after vizabi script
 
-`<script src="libs/vizabi.min.js"></script>`
-`<script src="libs/vizabi-ws-reader.js"></script>`
+```
+<script src="libs/vizabi.min.js"></script>
+<script src="libs/vizabi-ws-reader.js"></script>
+```
 
 Example of integrating WS reader into vizabi
 
