@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
-import * as ReaderUtils from '../src/reader-utils';
-
+import * as urlon from 'urlon';
 import { WsReader } from '../src';
+import * as ReaderUtils from '../src/reader-utils';
 
 sinon.test = sinonTest.configureTest(sinon);
 
@@ -113,7 +113,6 @@ describe('WsReader', () => {
         url: options.url,
         isJsonAsset: options.json
       }));
-
 
       return wsReader.getAsset('/assets/world-50m.jpg', {}).then(asset => {
         expect(asset.isJsonAsset).to.equal(false);
@@ -309,13 +308,13 @@ describe('WsReader', () => {
           error: 'Response is incorrect',
           data: {
             ddfql: {},
-            endpoint: 'http://localhost:3000/'
+            endpoint: `${wsReaderConfig.path}?${urlon.stringify({})}`
           }
         });
       });
     }));
 
-    it('reads data successfully', sinon.test(function () {
+    it('query without token & reads data successfully', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -324,6 +323,7 @@ describe('WsReader', () => {
       wsReader.init(wsReaderConfig);
 
       const response = {
+        dataset: 'open-numbers/globalis#development',
         headers: ['a', 'b', 'c'],
         rows: [
           ['a1', { hello: 'world' }, 'c1'],
@@ -349,10 +349,7 @@ describe('WsReader', () => {
           c: null
         }
       ];
-
-      const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
-
-      return wsReader.read({
+      const query = {
         from: 'datapoints',
         select: {
           key: [
@@ -363,12 +360,79 @@ describe('WsReader', () => {
             'indicator'
           ]
         }
-      }).then(actualResponse => {
+      };
+
+      const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
+
+      return wsReader.read(query).then(actualResponse => {
         expect(actualResponse).to.deep.equal(parsedResponse);
 
         sinon.assert.calledOnce(ajaxStub);
         sinon.assert.calledWith(ajaxStub, {
-          url: 'http://localhost:3000/?_from=datapoints&select_key@=dimension1&=dimension2;&value@=indicator',
+          url: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+          json: true
+        });
+      });
+    }));
+
+    it('query with token & reads data successfully', sinon.test(function () {
+      const wsReaderConfig = {
+        dataset_access_token: '123',
+        path: 'http://localhost:3000/',
+        dataset: 'open-numbers/globalis#development'
+      };
+
+      wsReader.init(wsReaderConfig);
+
+      const response = {
+        dataset: 'open-numbers/globalis#development',
+        headers: ['a', 'b', 'c'],
+        rows: [
+          ['a1', { hello: 'world' }, 'c1'],
+          ['a2', null, 'c2'],
+          ['a3', 'b3', undefined]
+        ]
+      };
+
+      const parsedResponse = [
+        {
+          a: 'a1',
+          b: '{"hello":"world"}',
+          c: 'c1'
+        },
+        {
+          a: 'a2',
+          b: null,
+          c: 'c2'
+        },
+        {
+          a: 'a3',
+          b: 'b3',
+          c: null
+        }
+      ];
+      const query = {
+        from: 'datapoints',
+        select: {
+          key: [
+            'dimension1',
+            'dimension2'
+          ],
+          value: [
+            'indicator'
+          ]
+        }
+      };
+      const subQuery = Object.assign({}, query, { dataset_access_token: wsReaderConfig.dataset_access_token });
+
+      const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
+
+      return wsReader.read(query).then(actualResponse => {
+        expect(actualResponse).to.deep.equal(parsedResponse);
+
+        sinon.assert.calledOnce(ajaxStub);
+        sinon.assert.calledWith(ajaxStub, {
+          url: `${wsReaderConfig.path}?${urlon.stringify(subQuery)}`,
           json: true
         });
       });
@@ -390,7 +454,7 @@ describe('WsReader', () => {
         expect(error).to.deep.equal({
           data: {
             ddfql: { from: 'datapoints' },
-            endpoint: 'http://localhost:3000/'
+            endpoint: `${wsReaderConfig.path}?${urlon.stringify({ from: 'datapoints' })}`
           },
           error: {
             data: 'incorrect',
@@ -405,21 +469,177 @@ describe('WsReader', () => {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
       };
+      const query = {
+        from: 'datapoints',
+        dataset: 'open-numbers/globalis#development'
+      };
+      const subQuery = {
+        from: 'datapoints',
+        dataset: encodeURIComponent(query.dataset)
+      };
 
       wsReader.init(wsReaderConfig);
 
       const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves({});
 
-      return wsReader.read({
-        from: 'datapoints',
-        dataset: 'open-numbers/globalis#development'
-      }).then(() => {
+      return wsReader.read(query).then(() => {
         sinon.assert.calledOnce(ajaxStub);
         sinon.assert.calledWith(ajaxStub, {
-          url: 'http://localhost:3000/?_from=datapoints&dataset=open-numbers%252Fglobalis%2523development',
+          url: `${wsReaderConfig.path}?${urlon.stringify(subQuery)}`,
           json: true
         });
       });
     }));
   });
+});
+
+describe('WsReader with ReaderPlugin', () => {
+  const ReaderPlugin = { onReadHook: sinon.stub() };
+  const wsReaderConfig = {
+    path: 'http://localhost:3000/',
+    dataset: 'open-numbers/globalis#development'
+  };
+  const response = {
+    dataset: 'open-numbers/globalis#development',
+    headers: ['a', 'b', 'c'],
+    rows: [
+      ['a1', { hello: 'world' }, 'c1'],
+      ['a2', null, 'c2'],
+      ['a3', 'b3', undefined]
+    ]
+  };
+  const parsedResponse = [
+    {
+      a: 'a1',
+      b: '{"hello":"world"}',
+      c: 'c1'
+    },
+    {
+      a: 'a2',
+      b: null,
+      c: 'c2'
+    },
+    {
+      a: 'a3',
+      b: 'b3',
+      c: null
+    }
+  ];
+  const query = {
+    from: 'datapoints',
+    select: {
+      key: [
+        'dimension1',
+        'dimension2'
+      ],
+      value: [
+        'indicator'
+      ]
+    }
+  };
+
+  beforeEach(() => {
+    wsReader = WsReader.getReader(ReaderPlugin);
+    wsReader.init(wsReaderConfig);
+  });
+
+  afterEach(() => {
+    ReaderPlugin.onReadHook.reset();
+  });
+
+  it('reads data successfully & emit 2 events: request & response', sinon.test(function () {
+    const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
+
+    return wsReader.read(query).then(actualResponse => {
+      expect(actualResponse).to.deep.equal(parsedResponse);
+
+      sinon.assert.calledOnce(ajaxStub);
+      sinon.assert.calledWith(ajaxStub, {
+        url: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+        json: true
+      });
+      sinon.assert.calledTwice(ReaderPlugin.onReadHook);
+      sinon.assert.calledWith(ReaderPlugin.onReadHook);
+      sinon.assert.callOrder(
+        ReaderPlugin.onReadHook.withArgs(query, 'request'),
+        ReaderPlugin.onReadHook.withArgs(sinon.match(Object.assign({
+          responseData: {
+            metadata: { endpoint: `${wsReaderConfig.path}?${urlon.stringify(query)}` },
+            data: 3
+          }
+        }, query)), 'response')
+      );
+    });
+  }));
+
+  it('reads data from server with connection error & emit 2 events: request & error connection', sinon.test(function () {
+    const _message = 'Boo!';
+    const expectedError = {
+      responseData: {
+        code: null,
+        message: sinon.match(`Error: ${_message}`),
+        metadata: { endpoint: `${wsReaderConfig.path}?${urlon.stringify(query)}` }
+      }
+    };
+    const ajaxStub = this.stub(ReaderUtils, 'ajax')
+      .rejects(new Error(_message));
+
+    return wsReader.read(query)
+      .then(() => {
+        expect(true).to.be.false;
+      })
+      .catch(error => {
+        expect(error.error.toString()).to.be.equal(`Error: ${_message}`);
+        expect(error.data).to.deep.equal({
+          endpoint: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+          ddfql: query
+        });
+
+        sinon.assert.calledOnce(ajaxStub);
+        sinon.assert.calledWith(ajaxStub, {
+          url: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+          json: true
+        });
+        sinon.assert.calledTwice(ReaderPlugin.onReadHook);
+        sinon.assert.callOrder(
+          ReaderPlugin.onReadHook.withArgs(query, 'request'),
+          ReaderPlugin.onReadHook.withArgs(sinon.match(Object.assign(expectedError, query)), 'error')
+        );
+      });
+  }));
+
+  it('reads data from server without message & emit 2 events: request & message from WS', sinon.test(function () {
+    const _message = 'incorrect';
+    const expectedError = {
+      responseData: {
+        code: null,
+        message: sinon.match(`Bad Response: ${_message}`),
+        metadata: { endpoint: `${wsReaderConfig.path}?${urlon.stringify(query)}` }
+      }
+    };
+    const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(_message);
+
+    return wsReader.read(query)
+      .then(() => {
+        expect(true).to.be.false;
+      })
+      .catch(error => {
+        expect(error.error).to.deep.equal({ data: _message, message: `Bad Response: ${_message}` });
+        expect(error.data).to.deep.equal({
+          endpoint: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+          ddfql: query
+        });
+
+        sinon.assert.calledOnce(ajaxStub);
+        sinon.assert.calledWith(ajaxStub, {
+          url: `${wsReaderConfig.path}?${urlon.stringify(query)}`,
+          json: true
+        });
+        sinon.assert.calledTwice(ReaderPlugin.onReadHook);
+        sinon.assert.callOrder(
+          ReaderPlugin.onReadHook.withArgs(query, 'request'),
+          ReaderPlugin.onReadHook.withArgs(sinon.match(Object.assign(expectedError, query)), 'error')
+        );
+      });
+  }));
 });

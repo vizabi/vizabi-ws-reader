@@ -37,25 +37,25 @@
     "all": true
   },
   "dependencies": {
-    "async-es": "2.0.0",
-    "lodash": "4.13.1",
+    "async-es": "2.6.0",
+    "lodash": "4.17.4",
     "urlon": "2.0.1",
     "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
     "babel": "6.23.0",
-    "babel-loader": "7.1.1",
-    "babel-plugin-istanbul": "4.1.4",
+    "babel-loader": "7.1.2",
+    "babel-plugin-istanbul": "4.1.5",
     "babel-preset-es2015": "6.24.1",
-    "babel-register": "6.24.1",
-    "chai": "4.0.2",
-    "eslint": "3.0.1",
+    "babel-register": "6.26.0",
+    "chai": "4.1.2",
+    "eslint": "4.14.0",
     "eslint-config-valorsoft": "0.1.0",
-    "husky": "0.13.4",
-    "mocha": "3.4.2",
-    "nyc": "11.0.2",
-    "sinon": "2.3.4",
-    "sinon-test": "1.0.2",
-    "webpack": "3.2.0"
+    "husky": "0.14.3",
+    "mocha": "4.0.1",
+    "nyc": "11.4.1",
+    "sinon": "4.1.3",
+    "sinon-test": "2.1.2",
+    "webpack": "3.10.0"
   }
 }

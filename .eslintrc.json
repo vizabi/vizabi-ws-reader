@@ -13,6 +13,7 @@
     "READER_BUILD_TIMESTAMP": true
   },
   "rules": {
+    "max-statements": [1],
     "arrow-body-style": "off",
     "max-len": [2, 200],
     "no-unused-vars": ["error", { "args": "none" }],

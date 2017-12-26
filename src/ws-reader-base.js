@@ -1,11 +1,11 @@
-import * as ReaderUtils from './reader-utils';
-import * as Urlon from 'urlon';
-import isString from 'lodash/isString';
-import isObject from 'lodash/isObject';
-import trimStart from 'lodash/trimStart';
-import trimEnd from 'lodash/trimEnd';
 import endsWith from 'lodash/endsWith';
+import isObject from 'lodash/isObject';
+import isString from 'lodash/isString';
 import split from 'lodash/split';
+import trimEnd from 'lodash/trimEnd';
+import trimStart from 'lodash/trimStart';
+import * as Urlon from 'urlon';
+import * as ReaderUtils from './reader-utils';
 
 const ERRORS = {
   NETWORK: 'Server is not reachable',
@@ -19,12 +19,12 @@ const READER_BUILD_TIMESTAMP_FALLBACK = 7777777777777;
 export const BaseWsReader = {
 
   /**
-  * @param {object} readerInfo
-  *  contains 'dataset' (in a format GITHUB_ACCOUNT_NAME/REPOSITORY#BRANCH)
-  *  contains 'path' (in a format https://waffle-server-dev.gapminderdev.org/api/ddf/ql)
-  *  contains 'assetsPath' (in a format https://import-waffle-server-dev.gapminderdev.org/api/ddf/assets/)
-  *  may contain 'dataset_access_token' for private repos
-  **/
+   * @param {object} readerInfo
+   *  contains 'dataset' (in a format GITHUB_ACCOUNT_NAME/REPOSITORY#BRANCH)
+   *  contains 'path' (in a format https://waffle-server-dev.gapminderdev.org/api/ddf/ql)
+   *  contains 'assetsPath' (in a format https://import-waffle-server-dev.gapminderdev.org/api/ddf/assets/)
+   *  may contain 'dataset_access_token' for private repos
+   **/
 
   init(readerInfo = {}) {
     this._name = 'waffle';
@@ -91,40 +91,50 @@ export const BaseWsReader = {
     if (this._dataset_access_token) {
       ddfql.dataset_access_token = this._dataset_access_token;
     }
+    const url = `${this._basepath}?${Urlon.stringify(ddfql)}`;
 
     if (this.onReadHook) {
       this.onReadHook(query, 'request');
     }
 
-    return ReaderUtils.ajax({ url: `${this._basepath}?${Urlon.stringify(ddfql)}`, json: true })
+    return ReaderUtils.ajax({ url, json: true })
       .then(response => {
         const options = {
+          query,
           response,
           parsers,
-          endpoint: this._basepath
+          endpoint: url
         };
-
-        if (this.onReadHook) {
-          const { from, select } = query;
-          const { response: { rows } } = options;
-
-          this.onReadHook({ from, select, responseLength: rows.length }, 'response');
-        }
 
         return this._onReadSuccess(options);
       })
       .catch(error => {
         const options = {
+          query,
           error,
           ddfql,
-          endpoint: this._basepath
+          endpoint: url
         };
 
         return this._onReadError(options);
       });
   },
 
-  _onReadError({ endpoint, ddfql, error }) {
+  _onReadError({ endpoint, query, ddfql, error }) {
+    if (this.onReadHook) {
+      const { from, select } = query;
+
+      this.onReadHook({
+        from,
+        select,
+        responseData: {
+          code: error.status || null,
+          message: error.stack || error.message,
+          metadata: { endpoint }
+        }
+      }, 'error');
+    }
+
     return Promise.reject({
       error,
       data: {
@@ -134,14 +144,23 @@ export const BaseWsReader = {
     });
   },
 
-  _onReadSuccess({ parsers, response }) {
-    if (!isObject(response)) {
+  _onReadSuccess(options) {
+    const { endpoint, query: { from, select }, parsers, response } = options;
+
+    if (!isObject(response) || (response.error || response.message)) {
+      const message = response.message || response.error || response;
       const errorDescription = {
-        message: `${ERRORS.RESPONSE}: ${response}`,
-        data: response
+        message: `${ERRORS.RESPONSE}: ${message}`,
+        data: message
       };
 
       return Promise.reject(errorDescription);
+    }
+
+    if (this.onReadHook) {
+      const { rows } = response;
+
+      this.onReadHook({ from, select, responseData: { metadata: { endpoint }, data: rows.length } }, 'response');
     }
 
     return this._parse(response, parsers);
