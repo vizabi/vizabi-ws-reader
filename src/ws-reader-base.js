@@ -92,6 +92,7 @@ export const BaseWsReader = {
       ddfql.dataset_access_token = this._dataset_access_token;
     }
     const url = `${this._basepath}?${Urlon.stringify(ddfql)}`;
+    const homepoint = this._getWindowLocationHref();
 
     if (this.onReadHook) {
       this.onReadHook(query, 'request');
@@ -103,7 +104,8 @@ export const BaseWsReader = {
           query,
           response,
           parsers,
-          endpoint: url
+          endpoint: url,
+          homepoint
         };
 
         return this._onReadSuccess(options);
@@ -113,14 +115,17 @@ export const BaseWsReader = {
           query,
           error,
           ddfql,
-          endpoint: url
+          endpoint: url,
+          homepoint
         };
 
         return this._onReadError(options);
       });
   },
 
-  _onReadError({ endpoint, query, ddfql, error }) {
+  _onReadError(options) {
+    const { homepoint, endpoint, query, ddfql, error } = options;
+
     if (this.onReadHook) {
       const { from, select } = query;
 
@@ -130,7 +135,7 @@ export const BaseWsReader = {
         responseData: {
           code: error.status || null,
           message: error.stack || error.message,
-          metadata: { endpoint }
+          metadata: { endpoint, homepoint }
         }
       }, 'error');
     }
@@ -139,13 +144,14 @@ export const BaseWsReader = {
       error,
       data: {
         endpoint,
+        homepoint,
         ddfql
       }
     });
   },
 
   _onReadSuccess(options) {
-    const { endpoint, query: { from, select }, parsers, response } = options;
+    const { homepoint, endpoint, query: { from, select }, parsers, response } = options;
 
     if (!isObject(response) || (response.error || response.message)) {
       const message = response.message || response.error || response;
@@ -160,7 +166,7 @@ export const BaseWsReader = {
     if (this.onReadHook) {
       const { rows } = response;
 
-      this.onReadHook({ from, select, responseData: { metadata: { endpoint }, data: rows.length } }, 'response');
+      this.onReadHook({ from, select, responseData: { metadata: { endpoint, homepoint }, data: rows.length } }, 'response');
     }
 
     return this._parse(response, parsers);
@@ -168,6 +174,10 @@ export const BaseWsReader = {
 
   _parse(response, parsers) {
     return ReaderUtils.mapRows(this._toPojo(response), parsers);
+  },
+
+  _getWindowLocationHref() {
+    return window.location.href;
   },
 
   _toPojo(response) {
