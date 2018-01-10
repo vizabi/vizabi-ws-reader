@@ -94,8 +94,8 @@ export const BaseWsReader = {
     const url = `${this._basepath}?${Urlon.stringify(ddfql)}`;
     const homepoint = this._getWindowLocationHref();
 
-    if (this.onReadHook) {
-      this.onReadHook(query, 'request');
+    if (this.onTrackRequest) {
+      this.onTrackRequest(query);
     }
 
     return ReaderUtils.ajax({ url, json: true })
@@ -123,21 +123,26 @@ export const BaseWsReader = {
       });
   },
 
+  _wrapError(error) {
+    return `status: ${error.status || '(empty)'}; message: ${error.message || '(empty)'}; stack: ${error.stack || '(empty)'}`;
+  },
+
   _onReadError(options) {
-    const { homepoint, endpoint, query, ddfql, error } = options;
+    const { homepoint, endpoint, ddfql, error } = options;
 
-    if (this.onReadHook) {
-      const { from, select } = query;
+    const event = {
+      homepoint,
+      endpoint,
+      error: this._wrapError(error),
+      message: this._wrapError(error)
+    };
 
-      this.onReadHook({
-        from,
-        select,
-        responseData: {
-          code: error.status || null,
-          message: error.stack || error.message,
-          metadata: { endpoint, homepoint }
-        }
-      }, 'error');
+    if (error.type === 'message') {
+      if (this.onTrackMessage) {
+        this.onTrackMessage(event);
+      }
+    } else if (this.onTrackException) {
+      this.onTrackException(event);
     }
 
     return Promise.reject({
@@ -151,22 +156,23 @@ export const BaseWsReader = {
   },
 
   _onReadSuccess(options) {
-    const { homepoint, endpoint, query: { from, select }, parsers, response } = options;
+    const { homepoint, endpoint, query, parsers, response } = options;
 
     if (!isObject(response) || (response.error || response.message)) {
-      const message = response.message || response.error || response;
       const errorDescription = {
-        message: `${ERRORS.RESPONSE}: ${message}`,
-        data: message
+        type: 'message',
+        status: ERRORS.RESPONSE,
+        message: response.message || response,
+        stack: response.error
       };
 
       return Promise.reject(errorDescription);
     }
 
-    if (this.onReadHook) {
-      const { rows } = response;
+    const event = { responseData: response.rows.length, endpoint, homepoint };
 
-      this.onReadHook({ from, select, responseData: { metadata: { endpoint, homepoint }, data: rows.length } }, 'response');
+    if (this.onTrackResponse) {
+      this.onTrackResponse(query, event);
     }
 
     return this._parse(response, parsers);
