@@ -7,7 +7,7 @@ const pkg = require('./package.json');
 const WEB = process.env.WEB_ENV;
 
 const config = {
-  entry: { 'main-backend': './src/index.js' },
+  entry: { 'main-backend': './src/index-node.js' },
   target: 'node',
   devtool: 'source-map',
   output: {
@@ -35,6 +35,7 @@ const config = {
 };
 
 if (WEB) {
+  config.entry['main-backend'] = './src/index-web.js';
   config.target = 'web';
   config.output.filename = 'vizabi-ws-reader.js';
   config.output.libraryTarget = 'var';
