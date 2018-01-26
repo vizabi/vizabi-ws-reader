@@ -85,8 +85,9 @@ export function getBaseWsReader(requestAdapter, homepointAdapter) {
     },
 
     read(query, parsers = {}) {
-      const ddfql = isString(this._dataset)
-        ? Object.assign({}, query, { dataset: encodeURIComponent(this._dataset) })
+      const dataset = query.dataset || this._dataset;
+      const ddfql = isString(dataset)
+        ? Object.assign({}, query, { dataset: encodeURIComponent(dataset) })
         : query;
 
       if (this._dataset_access_token) {
