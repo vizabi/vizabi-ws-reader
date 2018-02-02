@@ -15,7 +15,7 @@ describe('WsReader', () => {
   });
 
   describe('init', () => {
-    it('sets up initial values when no reader info is given', sinon.test(function() {
+    it('sets up initial values when no reader info is given', sinon.test(function () {
       const logErrorSpy = this.stub(console, 'error');
 
       wsReader.init();
@@ -28,7 +28,7 @@ describe('WsReader', () => {
       sinon.assert.calledWith(logErrorSpy, 'There is no base path for waffle reader, please, consider to provide one');
     }));
 
-    it('sets up reader\'s initial values from the reader info when it is given', sinon.test(function() {
+    it('sets up reader\'s initial values from the reader info when it is given', sinon.test(function () {
       wsReader.init({
         dataset: 'myDataset',
         assetsPath: '/path/to/assets/',
@@ -41,7 +41,7 @@ describe('WsReader', () => {
       expect(wsReader._basepath).to.equal('https://waffle.gapminder.org');
     }));
 
-    it('populates versionInfo property with build info', sinon.test(function() {
+    it('populates versionInfo property with build info', sinon.test(function () {
       global.READER_VERSION = '1.0-custom';
       global.READER_BUILD_TIMESTAMP = 12121212;
 
@@ -60,7 +60,7 @@ describe('WsReader', () => {
       Reflect.deleteProperty(global, 'READER_BUILD_TIMESTAMP');
     }));
 
-    it('populates versionInfo property with build info: uses fallback values if given globals are not defined', sinon.test(function() {
+    it('populates versionInfo property with build info: uses fallback values if given globals are not defined', sinon.test(function () {
       wsReader.init({
         dataset: 'myDataset',
         assetsPath: '/path/to/assets/',
@@ -75,7 +75,7 @@ describe('WsReader', () => {
   });
 
   describe('getAsset', () => {
-    it('should serve asset from dataset given to init', sinon.test(function() {
+    it('should serve asset from dataset given to init', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -99,7 +99,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should properly detect non json assets', sinon.test(function() {
+    it('should properly detect non json assets', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -119,7 +119,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should use dataset given in options rather than in init', sinon.test(function() {
+    it('should use dataset given in options rather than in init', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -141,7 +141,7 @@ describe('WsReader', () => {
         .then(asset => expect(asset.url).to.equal(expectedUrl));
     }));
 
-    it('should use master branch in url path if no branch is specified for a dataset', sinon.test(function() {
+    it('should use master branch in url path if no branch is specified for a dataset', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -164,7 +164,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should serve assets without starting slash', sinon.test(function() {
+    it('should serve assets without starting slash', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -187,7 +187,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should serve assets from default dataset', sinon.test(function() {
+    it('should serve assets from default dataset', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -206,7 +206,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should serve assets from default dataset when only branch is given', sinon.test(function() {
+    it('should serve assets from default dataset when only branch is given', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -225,7 +225,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should put a dataset_access_token in a query string', sinon.test(function() {
+    it('should put a dataset_access_token in a query string', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -250,7 +250,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should correctly handle assets path with trailing /', sinon.test(function() {
+    it('should correctly handle assets path with trailing /', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -273,7 +273,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('should explicitly say when there is no assetsPath provided', sinon.test(function() {
+    it('should explicitly say when there is no assetsPath provided', sinon.test(function () {
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         reader: 'waffle',
@@ -294,7 +294,7 @@ describe('WsReader', () => {
   });
 
   describe('read', () => {
-    it('rejects response when request to the server failed', sinon.test(function() {
+    it('rejects response when request to the server failed', sinon.test(function () {
       const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
@@ -317,7 +317,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('query without token & reads data successfully', sinon.test(function() {
+    it('query without token & reads data successfully', sinon.test(function () {
       const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
@@ -380,7 +380,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('query with token & reads data successfully', sinon.test(function() {
+    it('query with token & reads data successfully', sinon.test(function () {
       const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         dataset_access_token: '123',
@@ -445,7 +445,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('returns an error if response came in the incorrect format', sinon.test(function() {
+    it('returns an error if response came in the incorrect format', sinon.test(function () {
       const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
@@ -474,7 +474,7 @@ describe('WsReader', () => {
       });
     }));
 
-    it('encodes dataset provided in the ddfql query', sinon.test(function() {
+    it('encodes dataset provided in the ddfql query', sinon.test(function () {
       const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
@@ -559,7 +559,7 @@ describe('WsReader with ReaderPlugin', () => {
     ReaderPlugin.onReadHook.reset();
   });
 
-  it('reads data successfully & emit 2 events: request & response', sinon.test(function() {
+  it('reads data successfully & emit 2 events: request & response', sinon.test(function () {
     const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
     const getWindowLocationHrefStub = this.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
     const ajaxStub = this.stub(ReaderUtils, 'ajax').resolves(response);
@@ -587,7 +587,7 @@ describe('WsReader with ReaderPlugin', () => {
     });
   }));
 
-  it('reads data from server with connection error & emit 2 events: request & error connection', sinon.test(function() {
+  it('reads data from server with connection error & emit 2 events: request & error connection', sinon.test(function () {
     const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
     const getWindowLocationHrefStub = this.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
     const _message = 'Boo!';
@@ -627,7 +627,7 @@ describe('WsReader with ReaderPlugin', () => {
       });
   }));
 
-  it('reads data from server without message & emit 2 events: request & message from WS', sinon.test(function() {
+  it('reads data from server without message & emit 2 events: request & message from WS', sinon.test(function () {
     const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
     const getWindowLocationHrefStub = this.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
     const _message = 'incorrect';
