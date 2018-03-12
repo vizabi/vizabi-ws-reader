@@ -2,13 +2,14 @@ import 'whatwg-fetch';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
-import * as ReaderUtils from '../src/reader-utils';
+import * as RowUtils from '../src/row-utils';
+import * as ReaderUtils from '../src/reader-utils-web';
 
 import noop from 'lodash/noop';
 
 sinon.test = sinonTest.configureTest(sinon);
 
-describe('ReaderUtils', () => {
+describe('RowUtils', () => {
   describe('mapRows', () => {
     it('formats cells with identity as a default formatter', sinon.test(function () {
       const input = [
@@ -29,7 +30,7 @@ describe('ReaderUtils', () => {
         }
       ];
 
-      const actual = ReaderUtils.mapRows(input);
+      const actual = RowUtils.mapRows(input);
 
       expect(actual).to.deep.equal(input);
     }));
@@ -53,7 +54,7 @@ describe('ReaderUtils', () => {
         }
       ];
 
-      const actual = ReaderUtils.mapRows(input, { c: val => 'Foo!' });
+      const actual = RowUtils.mapRows(input, { c: val => 'Foo!' });
 
       const expected = [
         {

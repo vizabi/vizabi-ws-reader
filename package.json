@@ -39,6 +39,7 @@
   "dependencies": {
     "async-es": "2.6.0",
     "lodash": "4.17.4",
+    "node-fetch-polyfill": "2.0.6",
     "urlon": "2.0.1",
     "whatwg-fetch": "2.0.3"
   },

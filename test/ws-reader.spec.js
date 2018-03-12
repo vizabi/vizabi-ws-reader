@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
 import * as urlon from 'urlon';
-import { WsReader } from '../src';
-import * as ReaderUtils from '../src/reader-utils';
+import { WsReader } from '../src/index-web';
+import * as ReaderUtils from '../src/reader-utils-web';
 
 sinon.test = sinonTest.configureTest(sinon);
 
