@@ -24,6 +24,4 @@ function ajax(options = {}) {
     });
 }
 
-export {
-  ajax
-};
+export { ajax };
