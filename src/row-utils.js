@@ -33,6 +33,4 @@ function parseByDefault(value) {
   return isNaN(parsedValue) || !isFinite(parsedValue) ? value : parsedValue;
 }
 
-export {
-  mapRows
-};
+export { mapRows };
