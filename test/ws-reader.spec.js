@@ -329,7 +329,7 @@ describe('WsReader', () => {
       const parsedResponse = [
         {
           a: 'a1',
-          b: '{"hello":"world"}',
+          b: { hello: 'world' },
           c: 'c1'
         },
         {
@@ -391,7 +391,7 @@ describe('WsReader', () => {
       const parsedResponse = [
         {
           a: 'a1',
-          b: '{"hello":"world"}',
+          b: { hello: 'world' },
           c: 'c1'
         },
         {
