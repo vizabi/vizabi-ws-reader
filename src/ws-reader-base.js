@@ -6,17 +6,12 @@ import trimEnd from 'lodash/trimEnd';
 import trimStart from 'lodash/trimStart';
 import * as Urlon from 'urlon';
 import * as Utils from './row-utils';
-
-const ERRORS = {
-  NETWORK: 'Server is not reachable',
-  RESPONSE: 'Bad Response',
-  PARAM_PATH: 'There is no base path for waffle reader, please, consider to provide one'
-};
+import { WsError, WS_BAD_RESPONSE, WS_ERROR, WS_MESSAGE } from './ws-error';
 
 const READER_VERSION_FALLBACK = 'development';
 const READER_BUILD_TIMESTAMP_FALLBACK = 7777777777777;
 
-export function getBaseWsReader(requestAdapter, homepointAdapter) {
+export function getBaseWsReader(requestAdapter) {
   return {
 
     /**
@@ -40,7 +35,7 @@ export function getBaseWsReader(requestAdapter, homepointAdapter) {
       };
 
       if (!this._basepath) {
-        console.error(ERRORS.PARAM_PATH);
+        console.error('There is no base path for waffle reader, please, consider to provide one');
       }
     },
 
@@ -94,96 +89,34 @@ export function getBaseWsReader(requestAdapter, homepointAdapter) {
         ddfql.dataset_access_token = this._dataset_access_token;
       }
       const url = `${this._basepath}?${Urlon.stringify(ddfql)}`;
-      const homepoint = this._getWindowLocationHref();
-
-      if (this.onReadHook) {
-        this.onReadHook(query, 'request');
-      }
 
       return requestAdapter.ajax({ url, json: true })
         .then(response => {
-          const options = {
-            query,
-            response,
-            parsers,
-            endpoint: url,
-            homepoint
-          };
+          let wsError = null;
 
-          return this._onReadSuccess(options);
+          if (!isObject(response)) {
+            wsError = new WsError(WS_BAD_RESPONSE, response);
+          } else if (response.error) {
+            wsError = new WsError(WS_ERROR, response.error);
+          } else if (response.message) {
+            wsError = new WsError(WS_MESSAGE, response.message);
+          }
+
+          if (wsError) {
+            return Promise.reject({ error: wsError.valueOf() });
+          }
+
+          return Utils.mapRows(this._toPojo(response), parsers);
         })
         .catch(error => {
-          const options = {
-            query,
-            error,
-            ddfql,
-            endpoint: url,
-            homepoint
-          };
-
-          return this._onReadError(options);
+          return Promise.reject({
+            error: error.valueOf(),
+            data: {
+              endpoint: url,
+              ddfql
+            }
+          });
         });
-    },
-
-    _onReadError(options) {
-      const { homepoint, endpoint, query, ddfql, error } = options;
-
-      if (this.onReadHook) {
-        const { from, select } = query;
-
-        this.onReadHook({
-          from,
-          select,
-          responseData: {
-            code: error.status || null,
-            message: error.stack || error.message,
-            metadata: { endpoint, homepoint }
-          }
-        }, 'error');
-      }
-
-      return Promise.reject({
-        error,
-        data: {
-          endpoint,
-          homepoint,
-          ddfql
-        }
-      });
-    },
-
-    _onReadSuccess(options) {
-      const { homepoint, endpoint, query: { from, select }, parsers, response } = options;
-
-      if (!isObject(response) || (response.error || response.message)) {
-        const message = response.message || response.error || response;
-        const errorDescription = {
-          message: `${ERRORS.RESPONSE}: ${message}`,
-          data: message
-        };
-
-        return Promise.reject(errorDescription);
-      }
-
-      if (this.onReadHook) {
-        const { rows } = response;
-
-        this.onReadHook({ from, select, responseData: { metadata: { endpoint, homepoint }, data: rows.length } }, 'response');
-      }
-
-      return this._parse(response, parsers);
-    },
-
-    _parse(response, parsers) {
-      return Utils.mapRows(this._toPojo(response), parsers);
-    },
-
-    _getWindowLocationHref() {
-      return homepointAdapter.getHref();
-    },
-
-    _toPojo(response) {
-      return response;
     }
   };
 }
