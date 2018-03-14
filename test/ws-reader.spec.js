@@ -260,7 +260,6 @@ describe('WsReader', () => {
     afterEach(() => sandbox.restore());
 
     it('rejects response when request to the server failed', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -271,22 +270,19 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       return wsReader.read({}).catch(error => {
         expect(error).to.deep.equal({
           error: 'Response is incorrect',
           data: {
             ddfql: { dataset: 'open-numbers%2Fglobalis%23development' },
-            endpoint: `${wsReaderConfig.path}?_dataset=open-numbers%252Fglobalis%2523development`,
-            homepoint: expectedLocationHref
+            endpoint: `${wsReaderConfig.path}?_dataset=open-numbers%252Fglobalis%2523development`
           }
         });
       });
     });
 
     it('dataset from query have first priority', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -297,22 +293,19 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       return wsReader.read({ dataset: 'other-open-numbers/globalis#development' }).catch(error => {
         expect(error).to.deep.equal({
           error: 'Response is incorrect',
           data: {
             ddfql: { dataset: 'other-open-numbers%2Fglobalis%23development' },
-            endpoint: `${wsReaderConfig.path}?_dataset=other-open-numbers%252Fglobalis%2523development`,
-            homepoint: expectedLocationHref
+            endpoint: `${wsReaderConfig.path}?_dataset=other-open-numbers%252Fglobalis%2523development`
           }
         });
       });
     });
 
     it('query without token & reads data successfully', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -332,7 +325,6 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       const parsedResponse = [
         {
@@ -376,7 +368,6 @@ describe('WsReader', () => {
     });
 
     it('query with token & reads data successfully', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         dataset_access_token: '123',
         path: 'http://localhost:3000/',
@@ -396,7 +387,6 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       const parsedResponse = [
         {
@@ -440,7 +430,6 @@ describe('WsReader', () => {
     });
 
     it('returns an error if response came in the incorrect format', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -452,7 +441,6 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       return wsReader.read({ from: 'datapoints' }).catch(error => {
         expect(error).to.deep.equal({
@@ -461,19 +449,14 @@ describe('WsReader', () => {
               from: 'datapoints',
               dataset: 'open-numbers%2Fglobalis%23development'
             },
-            endpoint: `${wsReaderConfig.path}?_from=datapoints&dataset=open-numbers%252Fglobalis%2523development`,
-            homepoint: expectedLocationHref
+            endpoint: `${wsReaderConfig.path}?_from=datapoints&dataset=open-numbers%252Fglobalis%2523development`
           },
-          error: {
-            data: 'incorrect',
-            message: 'Bad Response: incorrect'
-          }
+          error: { error: 'WS bad response: "incorrect"' }
         });
       });
     });
 
     it('encodes dataset provided in the ddfql query', () => {
-      const expectedLocationHref = 'http://localhost:4200/tools/#_sgdfh=12324&_dfdf=fgsd';
       const wsReaderConfig = {
         path: 'http://localhost:3000/',
         dataset: 'open-numbers/globalis#development'
@@ -491,7 +474,6 @@ describe('WsReader', () => {
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
-      sandbox.stub(wsReader, '_getWindowLocationHref').returns(expectedLocationHref);
 
       return wsReader.read(query).then(() => {
         sinon.assert.calledOnce(ajaxStub);

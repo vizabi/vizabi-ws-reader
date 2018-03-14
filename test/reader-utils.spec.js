@@ -108,7 +108,7 @@ describe('RowUtils', () => {
       });
 
       return ReaderUtils.ajax().catch(error => {
-        expect(error.message).to.equal('Boo!');
+        expect(error.valueOf()).to.equal('Network response error: "Boo!"');
       });
     }));
 

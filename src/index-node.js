@@ -5,8 +5,7 @@ import * as ReaderUtils from './reader-utils-node';
 export const WsReader = {
   getReader(... readerPlugins) {
     const backendRequestAdapter = { ajax: ReaderUtils.ajax };
-    const backendHomepointAdapter = { getHref: () => null };
-    const BaseWsReader = getBaseWsReader(backendRequestAdapter, backendHomepointAdapter);
+    const BaseWsReader = getBaseWsReader(backendRequestAdapter);
 
     Object.assign(BaseWsReader, ... readerPlugins);
 
