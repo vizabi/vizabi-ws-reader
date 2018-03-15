@@ -36,10 +36,10 @@ const config = {
 
 if (WEB) {
   config.entry['main-backend'] = './src/index-web.js';
-  config.target = 'web';
+  // config.target = 'web';
   config.output.filename = 'vizabi-ws-reader.js';
-  config.output.libraryTarget = 'var';
-  config.output.library = 'WsReader';
+  // config.output.libraryTarget = 'var';
+  // config.output.library = 'WsReader';
 }
 
 module.exports = config;
