@@ -5,14 +5,15 @@ const webpack = require('webpack');
 const pkg = require('./package.json');
 
 const WEB = process.env.WEB_ENV;
+const NODE = process.env.FOR_NODE_ENV;
 
 const config = {
-  entry: { 'main-backend': './src/index-node.js' },
+  entry: { 'main-backend': './src/index-web.js' },
   target: 'node',
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'vizabi-ws-reader-node.js',
+    filename: 'vizabi-ws-reader.js',
     libraryTarget: 'commonjs2'
   },
   module: {
@@ -34,12 +35,21 @@ const config = {
   ]
 };
 
+if (NODE) {
+  config.entry['main-backend'] = './src/index-node.js';
+  config.output = {
+    path: path.join(__dirname, 'dist'),
+    filename: 'vizabi-ws-reader-node.js',
+    libraryTarget: 'commonjs2'
+  };
+}
+
 if (WEB) {
   config.entry['main-backend'] = './src/index-web.js';
-  // config.target = 'web';
-  config.output.filename = 'vizabi-ws-reader.js';
-  // config.output.libraryTarget = 'var';
-  // config.output.library = 'WsReader';
+  config.target = 'web';
+  config.output.filename = 'vizabi-ws-reader-web.js';
+  config.output.libraryTarget = 'var';
+  config.output.library = 'WsReader';
 }
 
 module.exports = config;

@@ -1,6 +1,6 @@
 {
   "name": "vizabi-ws-reader",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Vizabi WS reader",
   "main": "dist/vizabi-ws-reader.js",
   "repository": {
@@ -9,9 +9,10 @@
   },
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --ignore-path .gitignore --ext js --fix . .config",
-    "build": "PROD=1 npm run build-common && npm run build-web",
+    "build": "PROD=1 npm run build-common && npm run build-web && npm run build-node",
     "build-common": "npm run eslint && ./node_modules/.bin/webpack",
     "build-web": "npm run eslint && WEB_ENV=1 ./node_modules/.bin/webpack",
+    "build-node": "npm run eslint && FOR_NODE_ENV=1 ./node_modules/.bin/webpack",
     "test": "NODE_ENV=test nyc mocha --compilers js:babel-core/register test/**/*.spec.js",
     "prepublish": "npm run eslint && npm run build",
     "precommit": "npm run eslint && npm t"
