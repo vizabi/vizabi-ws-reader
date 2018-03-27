@@ -1,6 +1,8 @@
 import 'whatwg-fetch';
 
-import { WsError, NETWORK_RESPONSE_ERROR, UNEXPECTED_ERROR } from './ws-error';
+import { WsError, WS_RESPONSE_ERROR, NETWORK_ERROR } from './ws-error';
+
+const SERVER_ERROR_STATUS = 500;
 
 function ajax(options = {}) {
   const { url = '', json = false } = options;
@@ -14,7 +16,7 @@ function ajax(options = {}) {
   return fetch(url, { method: 'GET', headers })
     .then(response => {
       if (!response.ok) {
-        throw new WsError(NETWORK_RESPONSE_ERROR, response.statusText);
+        throw new WsError(WS_RESPONSE_ERROR, response.error);
       }
 
       return response;
@@ -26,10 +28,12 @@ function ajax(options = {}) {
       return response.text();
     })
     .catch(error => {
-      if (error instanceof WsError) {
+      if (error.name === 'WaffleServerError') {
         throw error;
       } else {
-        throw new WsError(UNEXPECTED_ERROR, error);
+        const status = error.response ? error.response.status : SERVER_ERROR_STATUS;
+
+        throw new WsError(`${NETWORK_ERROR} with status code ${status}`, error);
       }
     });
 }

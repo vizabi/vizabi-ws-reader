@@ -102,13 +102,26 @@ describe('RowUtils', () => {
     }));
 
     it('rejects request when response is not ok', sinon.test(function () {
+      const errorMsg = 'You choose select column(s) \'FAKEFAKEFAKEFAKEFAKEFAKE\' which aren\'t present in choosen dataset';
+
       global.fetch = sinon.stub().resolves({
         ok: false,
-        statusText: 'Boo!'
+        error: errorMsg
       });
 
       return ReaderUtils.ajax().catch(error => {
-        expect(error.valueOf()).to.equal('Network response error: "Boo!"');
+        expect(error.name).to.equal('WaffleServerError');
+        expect(error.message).to.equal('WS response error');
+        expect(error.details).to.equal(errorMsg);
+      });
+    }));
+
+    it('rejects request by external reason (connection lost)', sinon.test(function () {
+      global.fetch = sinon.stub().rejects(new Error('lost connection'));
+
+      return ReaderUtils.ajax().catch(error => {
+        expect(error.name).to.equal('WaffleServerError');
+        expect(error.message).to.equal('Network error with status code 500');
       });
     }));
 
