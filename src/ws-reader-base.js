@@ -88,7 +88,9 @@ export function getBaseWsReader(requestAdapter) {
       if (this._dataset_access_token) {
         ddfql.dataset_access_token = this._dataset_access_token;
       }
+
       const url = `${this._basepath}?${Urlon.stringify(ddfql)}`;
+      const endpoint = this._basepath;
 
       return requestAdapter.ajax({ url, json: true })
         .then(response => {
@@ -103,19 +105,17 @@ export function getBaseWsReader(requestAdapter) {
           }
 
           if (wsError) {
-            return Promise.reject({ error: wsError.valueOf() });
+            const errorToOut = Object.assign(wsError, { endpoint, url, ddfql });
+
+            return Promise.reject(errorToOut);
           }
 
           return Utils.mapRows(this._toPojo(response), parsers);
         })
         .catch(error => {
-          return Promise.reject({
-            error: error.valueOf(),
-            data: {
-              endpoint: url,
-              ddfql
-            }
-          });
+          const errorToOut = Object.assign(error, { endpoint, url, ddfql });
+
+          return Promise.reject(errorToOut);
         });
     }
   };

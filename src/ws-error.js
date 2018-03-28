@@ -1,18 +1,17 @@
-export const NETWORK_RESPONSE_ERROR = 'Network response error';
-export const UNEXPECTED_ERROR = 'Unexpected error';
+export const WS_RESPONSE_ERROR = 'WS response error';
+export const NETWORK_ERROR = 'Network error';
 export const WS_BAD_RESPONSE = 'WS bad response';
 export const WS_ERROR = 'WS error';
 export const WS_MESSAGE = 'WS message';
 
-export class WsError {
-  constructor(type, details) {
-    this.type = type;
+export class WsError extends Error {
+  constructor(message, details) {
+    super();
+    this.name = 'WaffleServerError';
+    this.message = message;
     this.details = details;
-  }
-
-  valueOf() {
-    const offset = 2;
-
-    return `${this.type}: ${JSON.stringify(this.details, null, offset)}`;
+    this.endpoint = null;
+    this.url = null;
+    this.ddfql = null;
   }
 }

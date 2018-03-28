@@ -2,6 +2,8 @@ import { WsJsonReader } from './ws-reader-wsjson';
 import { getBaseWsReader } from './ws-reader-base';
 import * as ReaderUtils from './reader-utils-web';
 
+export { WsError } from './ws-error';
+
 export const WsReader = {
   getReader(... readerPlugins) {
     const webRequestAdapter = { ajax: ReaderUtils.ajax };

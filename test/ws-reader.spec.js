@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as urlon from 'urlon';
-import { WsReader } from '../src/index-web';
+import { WsReader, WsError } from '../src/index-web';
 import * as ReaderUtils from '../src/reader-utils-web';
 
 const sandbox = sinon.createSandbox();
@@ -265,20 +265,18 @@ describe('WsReader', () => {
         dataset: 'open-numbers/globalis#development'
       };
 
-      sandbox.stub(ReaderUtils, 'ajax').resolves(Promise.reject('Response is incorrect'));
+      sandbox.stub(ReaderUtils, 'ajax').resolves(Promise.reject(new WsError('Response is incorrect')));
 
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
 
       return wsReader.read({}).catch(error => {
-        expect(error).to.deep.equal({
-          error: 'Response is incorrect',
-          data: {
-            ddfql: { dataset: 'open-numbers%2Fglobalis%23development' },
-            endpoint: `${wsReaderConfig.path}?_dataset=open-numbers%252Fglobalis%2523development`
-          }
-        });
+        expect(error.name).to.equal('WaffleServerError');
+        expect(error.message).to.equal('Response is incorrect');
+        expect(error.endpoint).to.equal(wsReaderConfig.path);
+        expect(error.url).to.equal(`${wsReaderConfig.path}?_dataset=open-numbers%252Fglobalis%2523development`);
+        expect(error.ddfql).to.deep.equal({ dataset: 'open-numbers%2Fglobalis%23development' });
       });
     });
 
@@ -288,20 +286,18 @@ describe('WsReader', () => {
         dataset: 'open-numbers/globalis#development'
       };
 
-      sandbox.stub(ReaderUtils, 'ajax').resolves(Promise.reject('Response is incorrect'));
+      sandbox.stub(ReaderUtils, 'ajax').resolves(Promise.reject(new WsError('Response is incorrect')));
 
       const wsReader = WsReader.getReader();
 
       wsReader.init(wsReaderConfig);
 
       return wsReader.read({ dataset: 'other-open-numbers/globalis#development' }).catch(error => {
-        expect(error).to.deep.equal({
-          error: 'Response is incorrect',
-          data: {
-            ddfql: { dataset: 'other-open-numbers%2Fglobalis%23development' },
-            endpoint: `${wsReaderConfig.path}?_dataset=other-open-numbers%252Fglobalis%2523development`
-          }
-        });
+        expect(error.name).to.equal('WaffleServerError');
+        expect(error.message).to.equal('Response is incorrect');
+        expect(error.endpoint).to.equal(wsReaderConfig.path);
+        expect(error.url).to.equal(`${wsReaderConfig.path}?_dataset=other-open-numbers%252Fglobalis%2523development`);
+        expect(error.ddfql).to.deep.equal({ dataset: 'other-open-numbers%2Fglobalis%23development' });
       });
     });
 
@@ -443,15 +439,14 @@ describe('WsReader', () => {
       wsReader.init(wsReaderConfig);
 
       return wsReader.read({ from: 'datapoints' }).catch(error => {
-        expect(error).to.deep.equal({
-          data: {
-            ddfql: {
-              from: 'datapoints',
-              dataset: 'open-numbers%2Fglobalis%23development'
-            },
-            endpoint: `${wsReaderConfig.path}?_from=datapoints&dataset=open-numbers%252Fglobalis%2523development`
-          },
-          error: { error: 'WS bad response: "incorrect"' }
+        expect(error.name).to.equal('WaffleServerError');
+        expect(error.message).to.equal('WS bad response');
+        expect(error.details).to.equal('incorrect');
+        expect(error.url).to.equal('http://localhost:3000/?_from=datapoints&dataset=open-numbers%252Fglobalis%2523development');
+        expect(error.endpoint).to.equal('http://localhost:3000/');
+        expect(error.ddfql).to.deep.equal({
+          from: 'datapoints',
+          dataset: 'open-numbers%2Fglobalis%23development'
         });
       });
     });
