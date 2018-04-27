@@ -5,7 +5,6 @@ import split from 'lodash/split';
 import trimEnd from 'lodash/trimEnd';
 import trimStart from 'lodash/trimStart';
 import * as Urlon from 'urlon';
-import * as Utils from './row-utils';
 import { WsError, WS_BAD_RESPONSE, WS_ERROR, WS_MESSAGE } from './ws-error';
 
 const READER_VERSION_FALLBACK = 'development';
@@ -110,7 +109,7 @@ export function getBaseWsReader(requestAdapter) {
             return Promise.reject(errorToOut);
           }
 
-          return Utils.mapRows(this._toPojo(response), parsers);
+          return response;
         })
         .catch(error => {
           const errorToOut = Object.assign(error, { endpoint, url, ddfql });
